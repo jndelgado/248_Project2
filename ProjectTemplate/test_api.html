@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script>
+        function search(zipCode, date) {
+            var webMethod = "ProjectServices.asmx/SearchRequest";
+            var parameters = "{\"zip\":\"" + encodeURI(zipCode) + "\"}";
+
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    //window.location.href = "./result_page.html";
+                    //alert(JSON.parse(msg))
+                    //alert(JSON.parse(msg.d)[1]);
+
+                    // Parsing the JSON data
+                    for (i = 1; i < 6; i++) {
+                        alert(JSON.parse(msg.d)[i]);
+                    };
+
+
+            //        // Pie Chart
+            //        var data = {
+            //          labels: [JSON.parse(msg.d)[1][0], JSON.parse(msg.d)[1][1]],
+            //          series: [parseInt(JSON.parse(msg.d)[1][0]), parseInt(JSON.parse(msg.d)[1][1])]
+            //        };
+            //        new Chartist.Pie('.ct-chart', data);
+
+            //        // Bar Median Age
+            //        document.getElementById("m_age").innerText = "Median Age: " + JSON.parse(msg.d)[1][2]
+            //        var data = {
+            //            labels: ['85282'],
+            //            series: [[parseInt(JSON.parse(msg.d)[1][2])]]
+            //        };
+            //        new Chartist.Bar('.ct-chart1', data )
+
+
+            //    },
+
+            //    // server replied false, cannot validate
+            //    error: function (e) {
+            //        alert("this code will only execute if javascript is unable to access the webservice");
+            //    }
+            //});
+        }
+    </script>
+</head>
+<body>
+
+
+
+</body>
+</html>
