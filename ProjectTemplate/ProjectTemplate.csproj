@@ -94,16 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="chart_test.html" />
-    <Content Include="contact_page.html" />
     <Content Include="Global.asax" />
-    <Content Include="login_page.html" />
-    <Content Include="Map.html" />
-    <Content Include="new_account_page.html" />
-    <Content Include="result_page - Copy.html" />
-    <Content Include="result_page.html" />
-    <Content Include="search_page.html" />
+    <Content Include="tailwind_test.html" />
     <Content Include="index.html" />
-    <Content Include="maps.jpg" />
     <Content Include="ProjectServices.asmx" />
     <Content Include="submitBtn_test.html" />
     <Content Include="test_api.html" />
@@ -121,6 +114,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="libman.json" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
