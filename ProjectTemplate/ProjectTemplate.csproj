@@ -95,6 +95,7 @@
   <ItemGroup>
     <Content Include="chart_test.html" />
     <Content Include="Global.asax" />
+    <Content Include="m&amp;ms-bg.jpg" />
     <Content Include="tailwind_test.html" />
     <Content Include="index.html" />
     <Content Include="ProjectServices.asmx" />
