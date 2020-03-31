@@ -67,7 +67,7 @@ namespace ProjectTemplate
         // Log On WebMethod
         [WebMethod]
         // ----- change return type from bool to int
-        public bool LogOn(string uid, string pass)
+        public bool LogOnMentee(string uid, string pass)
         {
             //LOGIC: pass the parameters into the database to see if an account
             //with these credentials exist.  If it does, then return true.  If
@@ -79,7 +79,7 @@ namespace ProjectTemplate
             //our connection string comes from our web.config file like we talked about earlier
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
             //here's our query.  A basic select with nothing fancy.  Note the parameters that begin with @
-            string sqlSelect = "SELECT id FROM users WHERE user_name=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Mentee WHERE username=@userName and password=@passValue";
 
             //set up our connection object to be ready to use our connection string
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
@@ -111,6 +111,76 @@ namespace ProjectTemplate
 
 
             // ------- 
+        }
+
+        // Log On Mentor
+        [WebMethod]
+        public bool LogOnMentor(string uid, string pass)
+        {
+            bool success = false;
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE username=@userName and password=@passValue";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@userName", HttpUtility.UrlDecode(uid));
+            sqlCommand.Parameters.AddWithValue("@passValue", HttpUtility.UrlDecode(pass));
+
+
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+
+            DataTable sqlDt = new DataTable();
+
+            sqlDa.Fill(sqlDt);
+
+
+            if (sqlDt.Rows.Count > 0)
+            {
+                success = true;
+            }
+
+            return success;
+
+        }
+
+        // Log On Admin
+        [WebMethod]
+        public bool LogOnAdmin(string uid, string pass)
+        {
+            bool success = false;
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+            string sqlSelect = "SELECT id FROM 2_Login_Admin WHERE username=@userName and password=@passValue";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@userName", HttpUtility.UrlDecode(uid));
+            sqlCommand.Parameters.AddWithValue("@passValue", HttpUtility.UrlDecode(pass));
+
+
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+
+            DataTable sqlDt = new DataTable();
+
+            sqlDa.Fill(sqlDt);
+
+
+            if (sqlDt.Rows.Count > 0)
+            {
+                success = true;
+            }
+
+            return success;
+
         }
 
         [WebMethod]

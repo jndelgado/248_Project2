@@ -93,10 +93,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="2_Homepages\HP_Admin.html" />
+    <Content Include="2_Homepages\HP_Mentor.html" />
+    <Content Include="2_Homepages\HP_Mentee.html" />
     <Content Include="chart_test.html" />
     <Content Include="Global.asax" />
-    <Content Include="m&amp;ms-bg.jpg" />
-    <Content Include="tailwind_test.html" />
+    <Content Include="2_Logins\Login_Admin.html" />
+    <Content Include="2_Logins\Login_Mentor.html" />
+    <Content Include="2_Logins\m&amp;ms-bg.jpg" />
+    <Content Include="2_Logins\Login_Mentee.html" />
     <Content Include="index.html" />
     <Content Include="ProjectServices.asmx" />
     <Content Include="submitBtn_test.html" />
