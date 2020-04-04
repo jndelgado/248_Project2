@@ -96,6 +96,8 @@
     <Content Include="2_Homepages\HP_Admin.html" />
     <Content Include="2_Homepages\HP_Mentor.html" />
     <Content Include="2_Homepages\HP_Mentee.html" />
+    <Content Include="2_Mentee\MentorSearch.html" />
+    <Content Include="2_Mentee\PStock.png" />
     <Content Include="chart_test.html" />
     <Content Include="Global.asax" />
     <Content Include="2_Logins\Login_Admin.html" />
@@ -130,6 +132,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="2_Admin\" />
+    <Folder Include="2_Mentor\" />
     <Folder Include="App_Data\" />
     <Folder Include="Controllers\" />
     <Folder Include="Models\" />
