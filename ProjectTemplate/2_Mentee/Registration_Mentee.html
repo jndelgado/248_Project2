@@ -3,50 +3,86 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script>
+        function NewMentee(email, password, fname, lname, zip, interest_area, availability) {
+            var webMethod = "../ProjectServices.asmx/NewMentee";
+            var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\"}";
+
+            //alert("RUNNING");
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Account successfully created.")
+                    window.location.href = "../2_Logins/Login_Mentee.html";
+
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="">
         <div class="">
             <div class="">
                 <h1 class="mb-8 text-3xl text-center">Mentee Sign Up</h1>
-                <input type="text"
-                       class=""
-                       name="fname"
-                       placeholder="First Name" />
+                <form onsubmit="NewMentee($('#email').val(), $('#password').val(), $('#fname').val(), $('#lname').val(), $('#zip').val(), $('#interest_area').val(), $('#availability').val()); return false;">
+                    <input type="text"
+                           class=""
+                           id ="fname"
+                           placeholder="First Name" />
 
-                <input type="text"
-                       class=""
-                       name="lname"
-                       placeholder="Last Name" />
+                    <input type="text"
+                           class=""
+                           id ="lname"
+                           placeholder="Last Name" />
 
-                <input type="text"
-                       class=""
-                       name="email"
-                       placeholder="Email" />
+                    <input type="text"
+                           class=""
+                           id ="email"
+                           placeholder="Email" />
 
-                <input type="password"
-                       class=""
-                       name="password"
-                       placeholder="Password" />
-                <input type="password"
-                       class=""
-                       name="confirm_password"
-                       placeholder="Confirm Password" />
+                    <input type="password"
+                           class=""
+                           id="password"
+                           placeholder="Password" />
 
-                <input type="text"
-                       class=""
-                       name="zip"
-                       placeholder="Zip Code" />
+                    <input type="text"
+                           class=""
+                           id="zip"
+                           placeholder="Zip Code" />
 
-                <input type="text"
-                       class=""
-                       name="interest_area"
-                       placeholder="Field of Expertise" />
+                    <select id="interest_area">
+                        <option value="" disabled selected>Area of Expertise</option>
+                        <option value="Teller">Teller</option>
+                        <option value="Analyst">Analyst</option>
+                        <option value="Auditor">Auditor</option>
+                        <option value="Accountant">Accountant</option>
+                        <option value="Advisor">Advisor</option>
+                    </select>
 
-                <button type="submit"
-                        class="">
-                    Create Account
-                </button>
+                    <select id="availability">
+                        <option value="" disabled selected>When are you available? </option>
+                        <option value="Morning">Morning</option>
+                        <option value="Afternoon">Afternoon</option>
+                        <option value="Evening">Evening</option>
+                    </select>
+
+                    <button type="submit"
+                            class="">
+                        Create Account
+                    </button>
+                </form>
             </div>
         </div>
 

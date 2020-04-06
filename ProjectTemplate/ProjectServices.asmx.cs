@@ -209,19 +209,51 @@ namespace ProjectTemplate
         }
 
         [WebMethod(EnableSession = true)]
-        public void NewAccount(string user_name, string password, string email)
+        public void NewMentee(string email, string password, string fname, string lname, string zip, string interest_area, string availability)
         {
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
 
-            string sqlSelect = "INSERT INTO users (user_name, password, email) VALUES (@user_name, @password, @email)";
+            string sqlSelect = "INSERT INTO 2_Login_Mentee (email, password, fname, lname, zip, interest_area, availability) VALUES (@email, @password, @fname, @lname, @zip, @interest_area, @availability)";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
             MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
 
-            sqlCommand.Parameters.AddWithValue("@user_name", HttpUtility.UrlDecode(user_name));
-            sqlCommand.Parameters.AddWithValue("@password", HttpUtility.UrlDecode(password));
             sqlCommand.Parameters.AddWithValue("@email", HttpUtility.UrlDecode(email));
+            sqlCommand.Parameters.AddWithValue("@password", HttpUtility.UrlDecode(password));
+            sqlCommand.Parameters.AddWithValue("@fname", HttpUtility.UrlDecode(fname));
+            sqlCommand.Parameters.AddWithValue("@lname", HttpUtility.UrlDecode(lname));
+            sqlCommand.Parameters.AddWithValue("@zip", HttpUtility.UrlDecode(zip));
+            sqlCommand.Parameters.AddWithValue("@interest_area", HttpUtility.UrlDecode(interest_area));
+            sqlCommand.Parameters.AddWithValue("@availability", HttpUtility.UrlDecode(availability));
+
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            DataTable sqlDt = new DataTable();
+            sqlDa.Fill(sqlDt);
+
+
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void NewMentor(string email, string password, string fname, string lname, string zip, string interest_area, string availability, string mentee_count)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+            string sqlSelect = "INSERT INTO 2_Login_Mentor (email, password, fname, lname, zip, interest_area, availability, mentee_count) VALUES (@email, @password, @fname, @lname, @zip, @interest_area, @availability, @mentee_count)";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@email", HttpUtility.UrlDecode(email));
+            sqlCommand.Parameters.AddWithValue("@password", HttpUtility.UrlDecode(password));
+            sqlCommand.Parameters.AddWithValue("@fname", HttpUtility.UrlDecode(fname));
+            sqlCommand.Parameters.AddWithValue("@lname", HttpUtility.UrlDecode(lname));
+            sqlCommand.Parameters.AddWithValue("@zip", HttpUtility.UrlDecode(zip));
+            sqlCommand.Parameters.AddWithValue("@interest_area", HttpUtility.UrlDecode(interest_area));
+            sqlCommand.Parameters.AddWithValue("@availability", HttpUtility.UrlDecode(availability));
+            sqlCommand.Parameters.AddWithValue("@mentee_count", HttpUtility.UrlDecode(mentee_count));
 
 
             MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
