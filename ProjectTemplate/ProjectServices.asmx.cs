@@ -4,6 +4,8 @@ using System;
 using System.Data;
 using System.Web;
 using System.Web.Services;
+using System.Collections.Generic;
+using System.Linq;
 
 
 
@@ -38,35 +40,34 @@ namespace ProjectTemplate
         /////////////////////////////////////////////////////////////////////////
         //don't forget to include this decoration above each method that you want
         //to be exposed as a web service!
-        [WebMethod(EnableSession = true)]
+        //[WebMethod(EnableSession = true)]
         /////////////////////////////////////////////////////////////////////////
-        public string TestConnection()
-        {
-            try
-            {
-                string testQuery = "select * from users";
+        //public string TestConnection()
+        //{
+        //    try
+        //    {
+        //        string testQuery = "select * from users";
 
-                ////////////////////////////////////////////////////////////////////////
-                ///here's an example of using the getConString method!
-                ////////////////////////////////////////////////////////////////////////
-                MySqlConnection con = new MySqlConnection(getConString());
-                ////////////////////////////////////////////////////////////////////////
+        //        ////////////////////////////////////////////////////////////////////////
+        //        ///here's an example of using the getConString method!
+        //        ////////////////////////////////////////////////////////////////////////
+        //        MySqlConnection con = new MySqlConnection(getConString());
+        //        ////////////////////////////////////////////////////////////////////////
 
-                MySqlCommand cmd = new MySqlCommand(testQuery, con);
-                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
-                DataTable table = new DataTable();
-                adapter.Fill(table);
-                return "Success!";
-            }
-            catch (Exception e)
-            {
-                return "Something went wrong, please check your credentials and db name and try again.  Error: " + e.Message;
-            }
-        }
+        //        MySqlCommand cmd = new MySqlCommand(testQuery, con);
+        //        MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+        //        DataTable table = new DataTable();
+        //        adapter.Fill(table);
+        //        return "Success!";
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return "Something went wrong, please check your credentials and db name and try again.  Error: " + e.Message;
+        //    }
+        //}
 
         // Log On WebMethod
-        [WebMethod]
-        // ----- change return type from bool to int
+        [WebMethod(EnableSession = true)]
         public bool LogOnMentee(string uid, string pass)
         {
             //LOGIC: pass the parameters into the database to see if an account
@@ -105,6 +106,8 @@ namespace ProjectTemplate
             {
                 //flip our flag to true so we return a value that lets them know they're logged in
                 success = true;
+                Session["id"] = sqlDt.Rows[0]["id"];
+                Session["user_type"] = "mentee";
             }
             //return the result!
             return success;
@@ -114,7 +117,7 @@ namespace ProjectTemplate
         }
 
         // Log On Mentor
-        [WebMethod]
+        [WebMethod(EnableSession = true)]
         public bool LogOnMentor(string uid, string pass)
         {
             bool success = false;
@@ -142,6 +145,8 @@ namespace ProjectTemplate
             if (sqlDt.Rows.Count > 0)
             {
                 success = true;
+                Session["id"] = sqlDt.Rows[0]["id"];
+                Session["user_type"] = "mentor";
             }
 
             return success;
@@ -149,7 +154,7 @@ namespace ProjectTemplate
         }
 
         // Log On Admin
-        [WebMethod]
+        [WebMethod(EnableSession = true)]
         public bool LogOnAdmin(string uid, string pass)
         {
             bool success = false;
@@ -177,36 +182,48 @@ namespace ProjectTemplate
             if (sqlDt.Rows.Count > 0)
             {
                 success = true;
+                Session["id"] = sqlDt.Rows[0]["id"];
+                Session["user_type"] = "admin";
             }
 
             return success;
 
         }
 
-        [WebMethod]
-        public string SearchRequest(string zip)
+        [WebMethod(EnableSession = true)]
+        public bool LogOff()
         {
-            // SQL Insert
-            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
-
-            string sqlSelect = "INSERT INTO searches (zip) VALUES (@zip)";
-
-            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
-
-            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
-
-            sqlCommand.Parameters.AddWithValue("@zip", HttpUtility.UrlDecode(zip));
-
-
-            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
-            DataTable sqlDt = new DataTable();
-            sqlDa.Fill(sqlDt);
-
-            // Census Grab
-            var client = new RestClient("https://api.census.gov/data/2018/acs/acs5/profile?get=DP05_0002PE,DP05_0003PE,DP05_0018E&for=zip%20code%20tabulation%20area:" + zip);
-            var response = client.Execute(new RestRequest());
-            return response.Content;
+            //if they log off, then we remove the session.  That way, if they access
+            //again later they have to log back on in order for their ID to be back
+            //in the session!
+            Session.Abandon();
+            return true;
         }
+
+        //[WebMethod]
+        //public string SearchRequest(string zip)
+        //{
+        //    // SQL Insert
+        //    string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+        //    string sqlSelect = "INSERT INTO searches (zip) VALUES (@zip)";
+
+        //    MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+        //    MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+        //    sqlCommand.Parameters.AddWithValue("@zip", HttpUtility.UrlDecode(zip));
+
+
+        //    MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+        //    DataTable sqlDt = new DataTable();
+        //    sqlDa.Fill(sqlDt);
+
+        //    // Census Grab
+        //    var client = new RestClient("https://api.census.gov/data/2018/acs/acs5/profile?get=DP05_0002PE,DP05_0003PE,DP05_0018E&for=zip%20code%20tabulation%20area:" + zip);
+        //    var response = client.Execute(new RestRequest());
+        //    return response.Content;
+        //}
 
         [WebMethod(EnableSession = true)]
         public void NewMentee(string email, string password, string fname, string lname, string zip, string interest_area, string availability)
@@ -262,6 +279,51 @@ namespace ProjectTemplate
 
 
         }
+
+        [WebMethod(EnableSession = true)]
+        public Mentor[] GetMentors()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentors");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "select id, email, fname, lname, zip, interest_area, availability from 2_Login_Mentor";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentor> mentors = new List<Mentor>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                mentors.Add(new Mentor
+                {
+                    id             = Convert.ToInt32(sqlDt.Rows[i]["id"]),
+                    email          = sqlDt.Rows[i]["email"].ToString(),
+                    fname          = sqlDt.Rows[i]["fname"].ToString(),
+                    lname          = sqlDt.Rows[i]["lname"].ToString(),
+                    zip            = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area  = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability   = sqlDt.Rows[i]["availability"].ToString()
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return mentors.ToArray();
+        }
+
 
     }
 }

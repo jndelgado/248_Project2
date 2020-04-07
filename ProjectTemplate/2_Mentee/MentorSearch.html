@@ -4,10 +4,112 @@
     <meta charset="utf-8" />
     <title>Mentor Search</title>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        function LogOff() {
+
+            var webMethod = "../ProjectServices.asmx/LogOff";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        //we logged off, so go back to logon page,
+                        //stop checking messages
+                        //and clear the chat panel
+                        //showPanel('logonPanel');
+                        //HideMenu();
+                        alert("Signed Out.");
+                        window.location = "../2_Logins/Login_Mentee.html";
+                    }
+                    else {
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+        function LoadMentors() {
+            var webMethod = "../ProjectServices.asmx/GetMentors";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        mentorsArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentors").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < mentorsArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+                            //if (accountsArray[i].userId != null) {
+                            //    acct = "<div class='accountRow' id='acct" + accountsArray[i].id + "'>" +
+                            //        "<a class='nameTag' href='mailto:" + accountsArray[i].email + "'>" +
+                            //        accountsArray[i].firstName + " " + accountsArray[i].lastName +
+                            //        "</a> <a href='#' onclick='LoadAccount(" + accountsArray[i].id + ")' class='optionsTag'>edit</a></div><hr>"
+                            //    admin = true;
+                            //}
+                            ////if not, then they're not an admin so don't include the edit option
+                            //else {
+                            //    acct = "<div class='accountRow' id='acct" + accountsArray[i].id + "'>" +
+                            //        "<a class='nameTag' href='mailto:" + accountsArray[i].email + "'>" +
+                            //        accountsArray[i].firstName + " " + accountsArray[i].lastName +
+                            //        "</a></div><hr>"
+                            //}
+                            $("#mentors").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //we're putting together a div that holds info on the
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-1/5 p-4'>" +
+                                    "<div class='w-full bg-white shadow-lg rounded-lg py-3'>" +
+                                        "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
+                                        "<div class='w-full text-center ml-1'>" + 
+                                            "<h2 class='text-lg'>" + mentorsArray[i].fname +" "+ mentorsArray[i].lname + "</h2>" +
+                                            "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
+                                            "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
+                                            "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
+                                            "<button class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                                "Add Mentor" +
+                                            "</button>" +
+                                        "</div>" +
+                                    "</div>" +
+                                "</div>"
+                            );
+                        }
+                    }
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+    </script>
 
 </head>
 
-<body class="bg-orange-300">
+<body class="bg-orange-300" onload="LoadMentors()">
     <!-- Banner -->
     <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
 
@@ -32,6 +134,7 @@
             </div>
             <div>
                 <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
             </div>
         </div>
 
@@ -116,317 +219,21 @@
     <!-- Mentor Full Catalog -->
 
     <div id="mentors" class="flex flex-wrap bg-transparent justify-center m-4">
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>
 
-
-
+        <!--<div class="w-1/5 p-4">
+            <div class="w-full bg-white shadow-lg rounded-lg py-3">
+                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
+                <div class="w-full text-center ml-1">
+                    <h2 class="text-lg">Jane Doe</h2>
+                    <div class="text-orange-500">Teller</div>
+                    <div class="text-gray-600">ZIP: 85282</div>
+                    <div class="text-gray-600">Available: Mornings</div>
+                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                        Add Mentor
+                    </button>
+                </div>
+            </div>
+        </div>-->
 
     </div> <!--End Catalog-->
 </body>

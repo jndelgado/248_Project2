@@ -4,6 +4,36 @@
     <meta charset="utf-8" />
     <title>Mentor Portal</title>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        function LogOff() {
+
+            var webMethod = "../ProjectServices.asmx/LogOff";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        //we logged off, so go back to logon page,
+                        //stop checking messages
+                        //and clear the chat panel
+                        //showPanel('logonPanel');
+                        //HideMenu();
+                        alert("Signed Out.");
+                        window.location = "../2_Logins/Login_Mentee.html";
+                    }
+                    else {
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+    </script>
 </head>
 
 <body class="bg-green-200">
@@ -28,6 +58,7 @@
             </div>
             <div>
                 <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
             </div>
         </div>
 
