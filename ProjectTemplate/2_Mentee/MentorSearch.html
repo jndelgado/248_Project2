@@ -7,32 +7,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <script type="text/javascript">
-        function LogOff() {
-
-            var webMethod = "../ProjectServices.asmx/LogOff";
-            $.ajax({
-                type: "POST",
-                url: webMethod,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (msg) {
-                    if (msg.d) {
-                        //we logged off, so go back to logon page,
-                        //stop checking messages
-                        //and clear the chat panel
-                        //showPanel('logonPanel');
-                        //HideMenu();
-                        alert("Signed Out.");
-                        window.location = "../2_Logins/Login_Mentee.html";
-                    }
-                    else {
-                    }
-                },
-                error: function (e) {
-                    alert("boo...");
-                }
-            });
-        }
 
         function LoadMentors() {
             var webMethod = "../ProjectServices.asmx/GetMentors";
@@ -42,7 +16,9 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (msg) {
+
                     if (msg.d.length > 0) {
+
                         //let's put our accounts that we get from the
                         //server into our accountsArray variable
                         //so we can use them in other functions as well
@@ -78,22 +54,23 @@
                                 //we're putting together a div that holds info on the
                                 //account as well as an edit link if the user is an admin
                                 "<div class='w-1/5 p-4'>" +
-                                    "<div class='w-full bg-white shadow-lg rounded-lg py-3'>" +
-                                        "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
-                                        "<div class='w-full text-center ml-1'>" + 
-                                            "<h2 class='text-lg'>" + mentorsArray[i].fname +" "+ mentorsArray[i].lname + "</h2>" +
-                                            "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
-                                            "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
-                                            "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
-                                            "<button class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
-                                                "Add Mentor" +
-                                            "</button>" +
-                                        "</div>" +
-                                    "</div>" +
+                                "<div id=" + mentorsArray[i].id + " class='w-full bg-white shadow-lg rounded-lg py-3'>" +
+                                "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
+                                "<div class='w-full text-center ml-1'>" +
+                                "<h2 class='text-lg'>" + mentorsArray[i].fname + " " + mentorsArray[i].lname + "</h2>" +
+                                "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
+                                "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
+                                "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
+                                "<button onclick=\"AddPair(this.id,2)\" id=" + mentorsArray[i].id + "' class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                "Add Mentor" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>" +
                                 "</div>"
                             );
                         }
                     }
+
                     //we're showing the account window, so let's track that...
                     //accountWindowShowing = true;
                     ////...because the ShowMenu function behaves differently depending on
@@ -105,11 +82,65 @@
                 }
             });
         }
-    </script>
 
+
+        function LogOff() {
+
+            var webMethod = "../ProjectServices.asmx/LogOff";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        //we logged off, so go back to logon page,
+                        //stop checking messages
+                        //and clear the chat panel
+                        //showPanel('logonPanel');
+                        //HideMenu();
+                        alert("Signed Out.");
+                        window.location = "../2_Logins/Login_Mentee.html";
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+        // function handles "add" button clicks and pairs mentees/mentors together
+        // grabs session id and mentor id
+        function AddPair(mentor_id, mentee_id) {
+
+            console.log("running");
+
+            var webMethod = "../ProjectServices.asmx/AddPair";
+            var parameters = "{\"mentor_id\":\"" + encodeURI(mentor_id) + "\",\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentor has been added!");
+                    //window.location.reload();
+
+                    
+                },
+                error: function (e) {
+                    alert("NOT GOOD");
+                }
+            });
+        }
+    </script>
 </head>
 
-<body class="bg-orange-300" onload="LoadMentors()">
+<body class="bg-orange-300" onload="LoadMentors();">
+
+
     <!-- Banner -->
     <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
 
@@ -236,6 +267,7 @@
         </div>-->
 
     </div> <!--End Catalog-->
+
 </body>
 
 </html>
