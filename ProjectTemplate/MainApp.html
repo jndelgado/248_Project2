@@ -1,0 +1,529 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>M&Ms</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        //using the stack card card approach to show items on the app
+        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel"];
+
+        //pannel toggle function
+        function showPanel(panelId) {
+            //clearData();
+            for (var i = 0; i < contentPanels.length; i++) {
+                if (panelId == contentPanels[i]) {
+                    $("#" + contentPanels[i]).css("visibility", "visible");
+                }
+                else {
+                    $("#" + contentPanels[i]).css("visibility", "hidden");
+                }
+            }
+        }
+
+        //function hideAllPanels() {
+        //    for (var i = 0; i < loginPanels.length; i++) {
+        //        $("#" + loginPanels[i]).css("visibility", "hidden");
+        //    }
+        //    for (var i = 0; i < contentPanels.length; i++) {
+        //        $("#" + contentPanels[i]).css("visibility", "hidden");
+        //    }
+        //}
+
+        //Log On Mentee Connection
+        function LogOnMentee(username, password) {
+            var webMethod = "ProjectServices.asmx/LogOnMentee";
+            var parameters = "{\"uid\":\"" + encodeURI(username) + "\",\"pass\":\"" + encodeURI(password) + "\"}";
+
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        showPanel("mentorSearchPanel");
+                        LoadMentors();
+                    }
+                    else {
+                        alert("Login Failed. Try Again.");
+                    }
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+
+        //Log On Mentor Connection
+        function LogOnMentor(username, password) {
+            var webMethod = "ProjectServices.asmx/LogOnMentor";
+            var parameters = "{\"uid\":\"" + encodeURI(username) + "\",\"pass\":\"" + encodeURI(password) + "\"}";
+
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        window.location.href = "../2_Homepages/HP_Mentor.html";
+                    }
+                    else {
+                        alert("Login Failed. Try Again.")
+                    }
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+
+        //Log On Admin Connection
+        function LogOnAdmin(username, password) {
+            var webMethod = "ProjectServices.asmx/LogOnAdmin";
+            var parameters = "{\"uid\":\"" + encodeURI(username) + "\",\"pass\":\"" + encodeURI(password) + "\"}";
+
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        window.location.href = "../2_Homepages/HP_Admin.html";
+                    }
+                    else {
+                        alert("Login Failed. Try Again.")
+                    }
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+
+        //Log Off
+        function LogOff() {
+
+            var webMethod = "../ProjectServices.asmx/LogOff";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d) {
+                        //we logged off, so go back to logon page,
+                        //stop checking messages
+                        //and clear the chat panel
+                        //showPanel('logonPanel');
+                        //HideMenu();
+                        alert("Signed Out.");
+                        showPanel("LogonMenteePanel");
+                    }
+                    else {
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+        //Populate Mentor Catalog Search 
+        function LoadMentors() {
+            var webMethod = "ProjectServices.asmx/GetMentors";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        mentorsArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentors").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < mentorsArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+
+                            $("#mentors").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //we're putting together a div that holds info on the
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-1/5 p-4'>" +
+                                "<div id=" + mentorsArray[i].id + " class='w-full bg-white shadow-lg rounded-lg py-3'>" +
+                                "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
+                                "<div class='w-full text-center ml-1'>" +
+                                "<h2 class='text-lg'>" + mentorsArray[i].fname + " " + mentorsArray[i].lname + "</h2>" +
+                                "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
+                                "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
+                                "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
+                                "<button onclick=\"AddPair(this.id,2)\" id=" + mentorsArray[i].id + "' class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                "Add Mentor" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>" +
+                                "</div>"
+                            );
+                        }
+                    }
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+
+
+    </script>
+</head>
+
+<body onload="showPanel('logonMenteePanel');">
+    
+    <div id="contentContainer">
+
+        <!-----------------------Mentee Portal----------------------->
+
+        <!--Mentee LogOn Panel-->
+        <div id="logonMenteePanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+
+            <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
+                <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
+                    Mentees & Mentors (M&Ms)
+                </span>
+            </div>
+
+            <!-- Log In Form -->
+            <div class="flex w-full max-w-xs mx-auto">
+
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnMentee($('#username').val(), $('#password').val()); return false;">
+
+                    <div class="mb-2">
+                        <span class="text-blue-500 font-bold">Login As:</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <ul class="flex border-b">
+                            <li class="-mb-px mr-1">
+                                <a class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold cursor-pointer" onclick="showPanel('logonMenteePanel')">Mentee</a>
+                            </li>
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMentorPanel')">Mentor</a>
+                            </li>
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonAdminPanel')">Admin</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                    </div>
+
+                    <!-- Sign In & Creating an Account -->
+                    <div class="flex items-center justify-between mb-4">
+                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                            Sign In
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button onclick="location.href = '../2_Mentee/Registration_Mentee.html'" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                            Become a Mentee
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div> <!--End Mentee-->
+
+        <!--Mentor Search/HomePage-->
+        <div id="mentorSearchPanel" class="bg-orange-300">
+            <!-- Banner -->
+            <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
+
+                <div class="flex flex-wrap items-center flex-shrink-0 text-white mr-6">
+                    <div class="w-full my-0">
+                        <span class="font-bold text-6xl tracking-tight">M&M's</span>
+                    </div>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <a onclick="showPanel(mentorSearchPanel)" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4 cursor-pointer">
+                            Mentor Search
+                        </a>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4">
+                            My Mentors
+                        </a>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700">
+                            FAQ
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                        <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!-- Top 5 Banner -->
+            <div class="ml-4 mt-4">
+                <span class="font-bold text-3xl">Top 5 Reccomendations</span>
+            </div>
+
+            <div id="top5" class="md:flex border-solid border-4 border-orange-400 bg-gray-200 justify-center rounded m-4 px-2">
+
+                <!-- Individual Divs for top 5 -->
+                <div class="w-1/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg p-6 mx-2 my-4">
+                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
+                    <div class="w-full text-center ml-1">
+                        <h2 id="name" class="text-lg">Jane Doe</h2>
+                        <div id="interest" class="text-orange-500">Teller</div>
+                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
+                        <div id="availability" class="text-gray-600">Available: Mornings</div>
+                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                            Add Mentor
+                        </button>
+                    </div>
+                </div>
+                <div class="w-1/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg p-6 mx-2 my-4">
+                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
+                    <div class="w-full text-center ml-1">
+                        <h2 id="name" class="text-lg">Jane Doe</h2>
+                        <div id="interest" class="text-orange-500">Teller</div>
+                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
+                        <div id="availability" class="text-gray-600">Available: Mornings</div>
+                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                            Add Mentor
+                        </button>
+                    </div>
+                </div>
+                <div class="w-1/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg p-6 mx-2 my-4">
+                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
+                    <div class="w-full text-center ml-1">
+                        <h2 id="name" class="text-lg">Jane Doe</h2>
+                        <div id="interest" class="text-orange-500">Teller</div>
+                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
+                        <div id="availability" class="text-gray-600">Available: Mornings</div>
+                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                            Add Mentor
+                        </button>
+                    </div>
+                </div>
+                <div class="w-1/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg p-6 mx-2 my-4">
+                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
+                    <div class="w-full text-center ml-1">
+                        <h2 id="name" class="text-lg">Jane Doe</h2>
+                        <div id="interest" class="text-orange-500">Teller</div>
+                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
+                        <div id="availability" class="text-gray-600">Available: Mornings</div>
+                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                            Add Mentor
+                        </button>
+                    </div>
+                </div>
+                <div class="w-1/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg p-6 mx-2 my-4">
+                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
+                    <div class="w-full text-center ml-1">
+                        <h2 id="name" class="text-lg">Jane Doe</h2>
+                        <div id="interest" class="text-orange-500">Teller</div>
+                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
+                        <div id="availability" class="text-gray-600">Available: Mornings</div>
+                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
+                            Add Mentor
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Catalog Banner -->
+            <div class="ml-4 mt-4">
+                <span class="font-bold text-2xl">All Mentors</span>
+            </div>
+
+            <!-- Mentor Full Catalog -->
+
+            <div id="mentors" class="flex flex-wrap bg-transparent justify-center m-4">
+
+            </div> <!--End Catalog-->
+
+        </div>
+
+
+        <!-----------------------Memtor Portal----------------------->
+
+        <!--Mentor LogOn Panel-->
+        <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+
+            <!-- Banner -->
+            <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
+                <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
+                    Mentees & Mentors (M&Ms)
+                </span>
+            </div>
+
+            <!-- Log In Form -->
+            <div class="flex w-full max-w-xs mx-auto">
+
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnMentor($('#username').val(), $('#password').val()); return false;">
+
+                    <div class="mb-2">
+                        <span class="text-blue-500 font-bold">Login As:</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <ul class="flex border-b">
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMenteePanel')">Mentee</a>
+                            </li>
+                            <li class="-mb-px mr-1">
+                                <a class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold cursor-pointer" onclick="showPanel('logonMentorPanel')">Mentor</a>
+                            </li>
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonAdminPanel')">Admin</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                    </div>
+
+                    <!-- Sign In & Creating an Account -->
+                    <div class="flex items-center justify-between mb-4">
+                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                            Sign In
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button onclick="location.href = '../2_Mentor/Registration_Mentor.html'" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                            Become a Mentor
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div> <!--End Mentor-->
+
+
+
+        <!--Admin LogOn Panel-->
+        <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            <!-- Banner -->
+            <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
+                <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
+                    Mentees & Mentors (M&Ms)
+                </span>
+            </div>
+
+            <!-- Log In Form -->
+            <div class="flex w-full max-w-xs mx-auto">
+
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnAdmin($('#username').val(), $('#password').val()); return false;">
+
+                    <div class="mb-2">
+                        <span class="text-blue-500 font-bold">Login As:</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <ul class="flex border-b">
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMenteePanel')">Mentee</a>
+                            </li>
+                            <li class="mr-1">
+                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMentorPanel')">Mentor</a>
+                            </li>
+                            <li class="-mb-px mr-1">
+                                <a class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold cursor-pointer" onclick="showPanel('logonAdminPanel')">Admin</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                    </div>
+
+                    <!-- Sign In & Creating an Account -->
+                    <div class="flex items-center justify-between mb-4">
+                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                            Sign In
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div> <!--End Amdin-->
+
+
+
+
+
+
+    </div>
+
+</body>
+</html>

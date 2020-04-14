@@ -107,7 +107,11 @@
     <Content Include="2_Logins\m&amp;ms-bg.jpg" />
     <Content Include="2_Logins\Login_Mentee.html" />
     <Content Include="index.html" />
+    <Content Include="m&amp;ms-bg.jpg" />
+    <Content Include="MainApp.html" />
+    <Content Include="ProfilePage.html" />
     <Content Include="ProjectServices.asmx" />
+    <Content Include="PStock.png" />
     <Content Include="submitBtn_test.html" />
     <Content Include="test.html" />
     <Content Include="test_api.html" />
