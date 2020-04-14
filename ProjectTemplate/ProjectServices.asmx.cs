@@ -80,7 +80,7 @@ namespace ProjectTemplate
             //our connection string comes from our web.config file like we talked about earlier
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
             //here's our query.  A basic select with nothing fancy.  Note the parameters that begin with @
-            string sqlSelect = "SELECT id FROM 2_Login_Mentee WHERE username=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Mentee WHERE email=@userName and password=@passValue";
 
             //set up our connection object to be ready to use our connection string
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
@@ -123,8 +123,7 @@ namespace ProjectTemplate
             bool success = false;
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
-
-            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE username=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE email=@userName and password=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
@@ -161,7 +160,7 @@ namespace ProjectTemplate
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
 
-            string sqlSelect = "SELECT id FROM 2_Login_Admin WHERE username=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Admin WHERE email=@userName and password=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 

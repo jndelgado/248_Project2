@@ -58,24 +58,10 @@
                             //var acct;
                             ////if they have access to admin-level info (like userid and password) then
                             ////create output that has an edit option
-                            //if (accountsArray[i].userId != null) {
-                            //    acct = "<div class='accountRow' id='acct" + accountsArray[i].id + "'>" +
-                            //        "<a class='nameTag' href='mailto:" + accountsArray[i].email + "'>" +
-                            //        accountsArray[i].firstName + " " + accountsArray[i].lastName +
-                            //        "</a> <a href='#' onclick='LoadAccount(" + accountsArray[i].id + ")' class='optionsTag'>edit</a></div><hr>"
-                            //    admin = true;
-                            //}
-                            ////if not, then they're not an admin so don't include the edit option
-                            //else {
-                            //    acct = "<div class='accountRow' id='acct" + accountsArray[i].id + "'>" +
-                            //        "<a class='nameTag' href='mailto:" + accountsArray[i].email + "'>" +
-                            //        accountsArray[i].firstName + " " + accountsArray[i].lastName +
-                            //        "</a></div><hr>"
-                            //}
+
                             $("#mentors").append(
                                 //anything we throw at our panel in the form of text
                                 //will be added to the contents of that panel.  Here
-                                //we're putting together a div that holds info on the
                                 //account as well as an edit link if the user is an admin
                                 "<div class='w-1/5 p-4'>" +
                                     "<div class='w-full bg-white shadow-lg rounded-lg py-3'>" +
@@ -85,14 +71,15 @@
                                             "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
                                             "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
                                             "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
-                                            "<button class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                            "<button id=" + mentorsArray[i].id + "class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
                                                 "Add Mentor" +
                                             "</button>" +
                                         "</div>" +
                                     "</div>" +
                                 "</div>"
                             );
-                        }
+                        }                   //we're putting together a div that holds info on the
+                         
                     }
                     //we're showing the account window, so let's track that...
                     //accountWindowShowing = true;
@@ -220,22 +207,8 @@
 
     <div id="mentors" class="flex flex-wrap bg-transparent justify-center m-4">
 
-        <!--<div class="w-1/5 p-4">
-            <div class="w-full bg-white shadow-lg rounded-lg py-3">
-                <img src="PStock.png" class="h-24 w-24 mx-auto" alt="Profile Pic" />
-                <div class="w-full text-center ml-1">
-                    <h2 class="text-lg">Jane Doe</h2>
-                    <div class="text-orange-500">Teller</div>
-                    <div class="text-gray-600">ZIP: 85282</div>
-                    <div class="text-gray-600">Available: Mornings</div>
-                    <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                        Add Mentor
-                    </button>
-                </div>
-            </div>
-        </div>-->
-
     </div> <!--End Catalog-->
+
 </body>
 
 </html>
