@@ -123,7 +123,7 @@ namespace ProjectTemplate
             bool success = false;
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
-            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE email=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE email=@userN`ame and password=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
@@ -324,18 +324,17 @@ namespace ProjectTemplate
         }
 
         [WebMethod(EnableSession = true)]
-        public void AddPair(string mentor_id, string mentee_id)
+        public void AddPair(string mentor_id)
         {
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
 
-            string sqlSelect = "INSERT INTO 2_Mentor_Mentee (mentor_id, mentee_id) VALUES (@mentor_id, @mentee_id)";
+            string sqlSelect = "INSERT INTO 2_Mentor_Mentee (mentor_id, mentee_id) VALUES (@mentor_id, " + Session["id"] + ")";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
             MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
 
             sqlCommand.Parameters.AddWithValue("@mentor_id", HttpUtility.UrlDecode(mentor_id));
-            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
 
 
             MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);

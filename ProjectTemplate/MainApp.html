@@ -178,7 +178,7 @@
                                 "<div class='text-orange-500'>" + mentorsArray[i].interest_area + "</div>" +
                                 "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
                                 "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
-                                "<button onclick=\"AddPair(this.id,2)\" id=" + mentorsArray[i].id + "' class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                "<button onclick=\"AddPair(this.id)\" id=" + mentorsArray[i].id + "' class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
                                 "Add Mentor" +
                                 "</button>" +
                                 "</div>" +
@@ -195,6 +195,29 @@
                 },
                 error: function (e) {
                     alert("boo...");
+                }
+            });
+        }
+
+        //Add Pair
+        function AddPair(mentor_id) {
+
+            console.log("running");
+
+            var webMethod = "../ProjectServices.asmx/AddPair";
+            var parameters = "{\"mentor_id\":\"" + encodeURI(mentor_id) + "\"}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentor has been added!");
+                },
+                error: function (e) {
+                    alert("NOT GOOD");
                 }
             });
         }
@@ -288,9 +311,9 @@
 
                 <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
                     <div class="text-1xl lg:flex-grow">
-                        <a onclick="showPanel(mentorSearchPanel)" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4 cursor-pointer">
+                        <button onclick="showPanel(mentorSearchPanel)" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4 cursor-pointer">
                             Mentor Search
-                        </a>
+                        </button>
                         <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4">
                             My Mentors
                         </a>
@@ -389,6 +412,8 @@
             </div> <!--End Catalog-->
 
         </div>
+
+
 
 
         <!-----------------------Memtor Portal----------------------->

@@ -109,6 +109,7 @@
     <Content Include="index.html" />
     <Content Include="m&amp;ms-bg.jpg" />
     <Content Include="MainApp.html" />
+    <Content Include="template_myMentorsPanel.html" />
     <Content Include="ProfilePage.html" />
     <Content Include="ProjectServices.asmx" />
     <Content Include="PStock.png" />
