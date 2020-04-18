@@ -292,7 +292,7 @@ namespace ProjectTemplate
             DataTable sqlDt = new DataTable("mentors");
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
-            string sqlSelect = "select id, email, fname, lname, zip, interest_area, availability from 2_Login_Mentor";
+            string sqlSelect = "SELECT * FROM 2_Login_Mentor WHERE id NOT IN (SELECT DISTINCT mentor_id FROM 2_Mentor_Mentee WHERE mentee_id = " + Session["id"] + "); ";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
             MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
@@ -317,6 +317,50 @@ namespace ProjectTemplate
                     zip            = sqlDt.Rows[i]["zip"].ToString(),
                     interest_area  = sqlDt.Rows[i]["interest_area"].ToString(),
                     availability   = sqlDt.Rows[i]["availability"].ToString()
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return mentors.ToArray();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public Mentor[] GetMyMentors()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentors");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT * FROM 2_Login_Mentor WHERE id IN (SELECT DISTINCT mentor_id FROM 2_Mentor_Mentee WHERE mentee_id = " + Session["id"] + "); ";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentor> mentors = new List<Mentor>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                mentors.Add(new Mentor
+                {
+                    id = Convert.ToInt32(sqlDt.Rows[i]["id"]),
+                    email = sqlDt.Rows[i]["email"].ToString(),
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString()
                 });
             }
             //convert the list of accounts to an array and return!

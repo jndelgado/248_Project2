@@ -16,6 +16,11 @@
             for (var i = 0; i < contentPanels.length; i++) {
                 if (panelId == contentPanels[i]) {
                     $("#" + contentPanels[i]).css("visibility", "visible");
+                    if (panelId == "mentorSearchPanel") {
+                        LoadMentors();
+                    } else if (panelId == "myMentorsPanel") {
+                        LoadMyMentors();
+                    }
                 }
                 else {
                     $("#" + contentPanels[i]).css("visibility", "hidden");
@@ -38,7 +43,7 @@
                 success: function (msg) {
                     if (msg.d) {
                         showPanel("mentorSearchPanel");
-                        LoadMentors();
+                        //LoadMentors();
                     }
                     else {
                         alert("Login Failed. Try Again.");
@@ -115,7 +120,7 @@
                 dataType: "json",
                 success: function (msg) {
                     alert("Account successfully created.")
-                    window.location.href = "../2_Logins/Login_Mentor.html";
+                    showPanel('logonMenteePanel');
 
                 },
                 error: function (e) {
@@ -239,6 +244,66 @@
                 }
             });
         }
+
+        //Get Logged in user's mentors
+        function LoadMyMentors() {
+            var webMethod = "ProjectServices.asmx/GetMyMentors";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        myMentorsArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#my_mentor_list").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < myMentorsArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+
+                            $("#my_mentor_list").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //we're putting together a div that holds info on the
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-2/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg bg-gray-200 m-4 p-2'>" +
+                                    "<img src='PStock.png' class='h-24 w-24 mx-auto mb-2' alt='Profile Pic' />" +
+                                    "<div class='w-full text-center ml-1'>" +
+                                        "<h2 class='text-lg'>" + myMentorsArray[i].fname + " " + myMentorsArray[i].lname + "</h2>" +
+                                        "<div class='text-orange-500'>" + myMentorsArray[i].interest_area + "</div>" +
+                                        "<div class='text-gray-600'>ZIP: " + myMentorsArray[i].zip + "</div>" +
+                                        "<div class='text-gray-600'>Available: " + myMentorsArray[i].availability + "</div>" +
+                                        "<button id=" + myMentorsArray[i].id + " class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                            "Remove Mentor" +
+                                        "</button>" +
+                                    "</div>" +
+                                "</div>"
+                            );
+                        }
+                    }
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+
 
         //Add Pair
         function AddPair(mentor_id) {
@@ -559,8 +624,9 @@
             </div> <!--End Catalog-->
 
         </div> <!--Mentor Search-->
+
         <!--My Mentors-->
-        <div id="myMentorsPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div id="myMentorsPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
             <!-- Banner -->
             <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
 
@@ -597,20 +663,9 @@
             </div>
 
             <!--Div for list mentors for which the mentee is enrolled with-->
-            <div id="my_mentor_list" class="p-5">
-                <div class="w-full border-solid border-2 border-gray-400 shadow-lg rounded-lg p-5 bg-gray-200">
-                    <img src="PStock.png" class="h-24 w-24 mx-auto mb-2" alt="Profile Pic" />
-                    <div class="w-full text-center ml-1">
-                        <h2 id="name" class="text-lg">Jane Doe</h2>
-                        <div id="interest" class="text-orange-500">Teller</div>
-                        <div id="zip" class="text-gray-600">ZIP: 85282</div>
-                        <div id="availability" class="text-gray-600">Available: Mornings</div>
-                        <button class="w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2">
-                            Remove Mentor
-                        </button>
-                    </div>
-                </div>
-            </div> <!--End My Mentors Panel-->
+            <div id="my_mentor_list" class="flex flex-wrap justify-center">
+
+            </div> <!--End List-->
 
         </div> <!--My Mentors-->
 
@@ -791,7 +846,7 @@
         </div> <!--End Mentor Registrations-->
 
 
-        <!-----------------------Admin Portal----------------------->]
+        <!-----------------------Admin Portal----------------------->
         <!--Admin LogOn Panel-->
         <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             <!-- Banner -->
