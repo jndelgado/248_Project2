@@ -8,7 +8,7 @@
 
     <script type="text/javascript">
         //using the stack card card approach to show items on the app
-        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel"];
+        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "menteeRegistrationPanel", "mentorRegistrationPanel"];
 
         //pannel toggle function
         function showPanel(panelId) {
@@ -22,15 +22,6 @@
                 }
             }
         }
-
-        //function hideAllPanels() {
-        //    for (var i = 0; i < loginPanels.length; i++) {
-        //        $("#" + loginPanels[i]).css("visibility", "hidden");
-        //    }
-        //    for (var i = 0; i < contentPanels.length; i++) {
-        //        $("#" + contentPanels[i]).css("visibility", "hidden");
-        //    }
-        //}
 
         //Log On Mentee Connection
         function LogOnMentee(username, password) {
@@ -59,6 +50,30 @@
             });
         }
 
+        //Mentee Registration
+        function NewMentee(email, password, fname, lname, zip, interest_area, availability) {
+            var webMethod = "../ProjectServices.asmx/NewMentee";
+            var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\"}";
+
+            //alert("RUNNING");
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Account successfully created.")
+                    window.location.href = "../2_Logins/Login_Mentee.html";
+
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+
         //Log On Mentor Connection
         function LogOnMentor(username, password) {
             var webMethod = "ProjectServices.asmx/LogOnMentor";
@@ -78,6 +93,30 @@
                     else {
                         alert("Login Failed. Try Again.")
                     }
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
+
+        //Mentor Registration
+        function NewMentor(email, password, fname, lname, zip, interest_area, availability, mentee_count) {
+            var webMethod = "../ProjectServices.asmx/NewMentor";
+            var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\",\"mentee_count\":\"" + encodeURI(mentee_count) + "\"}";
+
+            //alert("RUNNING");
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Account successfully created.")
+                    window.location.href = "../2_Logins/Login_Mentor.html";
+
                 },
                 error: function (e) {
                     alert("this code will only execute if javascript is unable to access the webservice");
@@ -128,7 +167,9 @@
                         //showPanel('logonPanel');
                         //HideMenu();
                         alert("Signed Out.");
-                        showPanel("LogonMenteePanel");
+                        showPanel("logonMenteePanel");
+                        $("#username").val("");
+                        $("#password").val("");
                     }
                     else {
                     }
@@ -231,7 +272,6 @@
     <div id="contentContainer">
 
         <!-----------------------Mentee Portal----------------------->
-
         <!--Mentee LogOn Panel-->
         <div id="logonMenteePanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
@@ -285,7 +325,7 @@
                         </button>
                     </div>
                     <div class="flex items-center justify-between">
-                        <button onclick="location.href = '../2_Mentee/Registration_Mentee.html'" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                        <button onclick="showPanel('menteeRegistrationPanel')" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                             Become a Mentee
                         </button>
                     </div>
@@ -295,7 +335,115 @@
             </div>
 
         </div> <!--End Mentee-->
+        <!--Mentee Registration-->
+        <div id="menteeRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
+            <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8 justify-center">
+                <span class="font-bold text-6xl tracking-tight text-white my-10">
+                    Mentee Registration
+                </span>
+            </div>
+
+            <div class="flex w-full max-w-6xl mx-auto shadow-lg border-orange-500 border-4 rounded bg-gray-100 p-5">
+
+                <form class="w-full text-3xl" onsubmit="NewMentee($('#email').val(), $('#password').val(), $('#fname').val(), $('#lname').val(), $('#zip').val(), $('#interest_area').val(), $('#availability').val()); return false;">
+
+                    <div class="flex flex-wrap -mx-3 mb-6">
+
+                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="fname">
+                                First Name
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="fname" type="text" placeholder="Jane">
+                        </div>
+
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="lname">
+                                Last Name
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="lname" type="text" placeholder="Doe">
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-wrap -mx-3 mb-6">
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="email">
+                                Email
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="email" type="text" placeholder="mentee@myspace.gov">
+                        </div>
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="password">
+                                Password
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="password" type="password" placeholder="******************">
+                            <p class="text-gray-600 text-xs italic">Make it as long and as crazy as you'd like</p>
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-wrap -mx-3 mb-2">
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-state">
+                                Title
+                            </label>
+                            <div class="relative">
+                                <select id="interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                    <option value="Teller">Teller</option>
+                                    <option value="Analyst">Analyst</option>
+                                    <option value="Auditor">Auditor</option>
+                                    <option value="Accountant">Accountant</option>
+                                    <option value="Advisor">Advisor</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-state">
+                                Availability
+                            </label>
+                            <div class="relative">
+                                <select id="availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-zip">
+                                Zip
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-zip" type="text" placeholder="85281">
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="w-full bg-orange-500 text-white border-4 border-transparent rounded hover:bg-orange-300 hover:border-orange-500 hover:text-black hover:font-semibold p-2 mb-2 mt-8">
+                        Create Account
+                    </button>
+
+                    <button onclick="showPanel('logonMenteePanel')" class="w-full bg-orange-500 text-white border-4 border-transparent rounded hover:bg-orange-300 hover:border-orange-500 hover:text-black hover:font-semibold p-2 my-2">
+                        Already have an account? Log In Here
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div> <!--End Mentee Registrations-->
         <!--Mentor Search/HomePage-->
         <div id="mentorSearchPanel" class="bg-orange-300">
             <!-- Banner -->
@@ -322,7 +470,7 @@
                     </div>
                     <div>
                         <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
-                        <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
                     </div>
                 </div>
 
@@ -411,7 +559,6 @@
             </div> <!--End Catalog-->
 
         </div> <!--Mentor Search-->
-
         <!--My Mentors-->
         <div id="myMentorsPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             <!-- Banner -->
@@ -438,7 +585,7 @@
                     </div>
                     <div>
                         <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
-                        <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
                     </div>
                 </div>
 
@@ -468,8 +615,7 @@
         </div> <!--My Mentors-->
 
 
-        <!-----------------------Memtor Portal----------------------->
-
+        <!-----------------------Mentor Portal----------------------->
         <!--Mentor LogOn Panel-->
         <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
@@ -524,7 +670,7 @@
                         </button>
                     </div>
                     <div class="flex items-center justify-between">
-                        <button onclick="location.href = '../2_Mentor/Registration_Mentor.html'" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                        <button onclick="showPanel('mentorRegistrationPanel')" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                             Become a Mentor
                         </button>
                     </div>
@@ -533,8 +679,119 @@
 
             </div>
 
-        </div> <!--End Mentor-->
+        </div> <!--End Mentor LogOn-->
+        <!--Mentee Registration-->
+        <div id="mentorRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
+            <div class="shadow rounded flex w-9/10 bg-green-500 my-4 mx-8 justify-center">
+                <span class="font-bold text-6xl tracking-tight text-white my-10">
+                    Mentor Registration
+                </span>
+            </div>
+
+            <div class="flex w-full max-w-6xl mx-auto shadow-lg border-green-500 border-4 rounded bg-gray-100 p-5">
+
+                <form class="w-full text-3xl" onsubmit="NewMentor($('#email').val(), $('#password').val(), $('#fname').val(), $('#lname').val(), $('#zip').val(), $('#interest_area').val(), $('#availability').val()); return false;">
+
+                    <div class="flex flex-wrap -mx-3 mb-6">
+
+                        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="fname">
+                                First Name
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="fname" type="text" placeholder="Jane">
+                        </div>
+
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="lname">
+                                Last Name
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="lname" type="text" placeholder="Doe">
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-wrap -mx-3 mb-6">
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="email">
+                                Email
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="email" type="text" placeholder="mentee@myspace.gov">
+                        </div>
+
+                        <div class="w-full md:w-1/2 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="password">
+                                Password
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="password" type="password" placeholder="******************">
+                            <p class="text-gray-600 text-xs italic">Make it as long and as crazy as you'd like</p>
+                        </div>
+
+                    </div>
+
+                    <div class="flex flex-wrap -mx-3 mb-2">
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-state">
+                                Title
+                            </label>
+                            <div class="relative">
+                                <select id="interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                    <option value="Teller">Teller</option>
+                                    <option value="Analyst">Analyst</option>
+                                    <option value="Auditor">Auditor</option>
+                                    <option value="Accountant">Accountant</option>
+                                    <option value="Advisor">Advisor</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-state">
+                                Availability
+                            </label>
+                            <div class="relative">
+                                <select id="availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-zip">
+                                Zip
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-zip" type="text" placeholder="85281">
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 mb-2 mt-8">
+                        Create Account
+                    </button>
+
+                    <button onclick="showPanel('logonMentorPanel')" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 my-2">
+                        Already have an account? Log In Here
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div> <!--End Mentor Registrations-->
+
+
+        <!-----------------------Admin Portal----------------------->]
         <!--Admin LogOn Panel-->
         <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             <!-- Banner -->
