@@ -123,7 +123,7 @@ namespace ProjectTemplate
             bool success = false;
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
-            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE email=@userN`ame and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Mentor WHERE email=@userName and password=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
@@ -366,6 +366,53 @@ namespace ProjectTemplate
             //convert the list of accounts to an array and return!
             return mentors.ToArray();
         }
+
+
+        [WebMethod(EnableSession = true)]
+        public Mentee[] GetMyMentees()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentees");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT * FROM 2_Login_Mentee WHERE id IN (SELECT DISTINCT mentee_id FROM 2_Mentor_Mentee WHERE mentor_id = " + Session["id"] + "); ";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentee> mentees = new List<Mentee>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                mentees.Add(new Mentee
+                {
+                    id = Convert.ToInt32(sqlDt.Rows[i]["id"]),
+                    email = sqlDt.Rows[i]["email"].ToString(),
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString()
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return mentees.ToArray();
+        }
+
+
 
         [WebMethod(EnableSession = true)]
         public void AddPair(string mentor_id)

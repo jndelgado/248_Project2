@@ -8,7 +8,7 @@
 
     <script type="text/javascript">
         //using the stack card card approach to show items on the app
-        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "menteeRegistrationPanel", "mentorRegistrationPanel"];
+        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "myMenteesPanel", "menteeRegistrationPanel", "mentorRegistrationPanel"];
 
         //pannel toggle function
         function showPanel(panelId) {
@@ -20,6 +20,8 @@
                         LoadMentors();
                     } else if (panelId == "myMentorsPanel") {
                         LoadMyMentors();
+                    } else if (panelId == "myMenteesPanel") {
+                        LoadMyMentees();
                     }
                 }
                 else {
@@ -82,7 +84,7 @@
         //Log On Mentor Connection
         function LogOnMentor(username, password) {
             var webMethod = "ProjectServices.asmx/LogOnMentor";
-            var parameters = "{\"uid\":\"" + encodeURI(username) + "\",\"pass\":\"" + encodeURI(password) + "\"}";
+            var parameters = "{\"uid\":\"" + encodeURI(username) + "\",\"pass\":\"" + encodeURI(password) + "\"}"
 
             //jQuery ajax method
             $.ajax({
@@ -93,7 +95,7 @@
                 dataType: "json",
                 success: function (msg) {
                     if (msg.d) {
-                        window.location.href = "../2_Homepages/HP_Mentor.html";
+                        showPanel("myMenteesPanel");
                     }
                     else {
                         alert("Login Failed. Try Again.")
@@ -158,7 +160,7 @@
         //Log Off
         function LogOff() {
 
-            var webMethod = "../ProjectServices.asmx/LogOff";
+            var webMethod = "ProjectServices.asmx/LogOff";
             $.ajax({
                 type: "POST",
                 url: webMethod,
@@ -175,6 +177,9 @@
                         showPanel("logonMenteePanel");
                         $("#username").val("");
                         $("#password").val("");
+                        $("#mentor_username").val("");
+                        $("#mentor_password").val("");
+
                     }
                     else {
                     }
@@ -302,6 +307,66 @@
                 }
             });
         }
+
+
+        //Get Logged in user's mentees
+        function LoadMyMentees() {
+            var webMethod = "ProjectServices.asmx/GetMyMentees";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        myMenteesArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#my_mentee_list").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < myMenteesArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+
+                            $("#my_mentee_list").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //we're putting together a div that holds info on the
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-2/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg bg-gray-200 m-4 p-2'>" +
+                                "<img src='PStock.png' class='h-24 w-24 mx-auto mb-2' alt='Profile Pic' />" +
+                                "<div class='w-full text-center ml-1'>" +
+                                "<h2 class='text-lg'>" + myMenteesArray[i].fname + " " + myMenteesArray[i].lname + "</h2>" +
+                                "<div class='text-orange-500'>" + myMenteesArray[i].interest_area + "</div>" +
+                                "<div class='text-gray-600'>ZIP: " + myMenteesArray[i].zip + "</div>" +
+                                "<div class='text-gray-600'>Available: " + myMenteesArray[i].availability + "</div>" +
+                                "<button id=" + myMenteesArray[i].id + " class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                "Remove Mentee" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>"
+                            );
+                        }
+                    }
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
 
 
 
@@ -500,7 +565,7 @@
                         Create Account
                     </button>
 
-                    <button onclick="showPanel('logonMenteePanel')" class="w-full bg-orange-500 text-white border-4 border-transparent rounded hover:bg-orange-300 hover:border-orange-500 hover:text-black hover:font-semibold p-2 my-2">
+                    <button onclick="showPanel('logonMenteePanel')" class="w-full bg-orange-500 text-white border-4 border-transparent rounded hover:bg-orange-300 hover:border-orange-500 hover:text-black hover:font-semibold p-2 my-2" type="button">
                         Already have an account? Log In Here
                     </button>
 
@@ -624,7 +689,6 @@
             </div> <!--End Catalog-->
 
         </div> <!--Mentor Search-->
-
         <!--My Mentors-->
         <div id="myMentorsPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
             <!-- Banner -->
@@ -668,8 +732,6 @@
             </div> <!--End List-->
 
         </div> <!--My Mentors-->
-
-
         <!-----------------------Mentor Portal----------------------->
         <!--Mentor LogOn Panel-->
         <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
@@ -684,7 +746,7 @@
             <!-- Log In Form -->
             <div class="flex w-full max-w-xs mx-auto">
 
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnMentor($('#username').val(), $('#password').val()); return false;">
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnMentor($('#mentor_username').val(), $('#mentor_password').val()); return false;">
 
                     <div class="mb-2">
                         <span class="text-blue-500 font-bold">Login As:</span>
@@ -708,14 +770,14 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
                             Username
                         </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username">
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="mentor_username" type="text" placeholder="Username">
                     </div>
 
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
                             Password
                         </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="mentor_password" type="password" placeholder="******************">
                     </div>
 
                     <!-- Sign In & Creating an Account -->
@@ -835,7 +897,7 @@
                         Create Account
                     </button>
 
-                    <button onclick="showPanel('logonMentorPanel')" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 my-2">
+                    <button onclick="showPanel('logonMentorPanel')" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 my-2" type="button" >
                         Already have an account? Log In Here
                     </button>
 
@@ -844,8 +906,52 @@
             </div>
 
         </div> <!--End Mentor Registrations-->
+        
+        
+        
+        <!--My Mentees-->
+        <div id="myMenteesPanel" class="bg-green-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+            <!-- Banner -->
+            <nav class="flex items-center justify-between flex-wrap bg-green-500 p-6">
 
+                <div class="flex flex-wrap items-center flex-shrink-0 text-white mr-6">
+                    <div class="w-full my-0">
+                        <span class="font-bold text-6xl tracking-tight">M&M's</span>
+                    </div>
 
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('#')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                            Mentee Search
+                        </button>
+                        <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-green-700 mr-4 bg-green-200 rounded p-1 shadow border-transparent">
+                            My Mentees
+                        </button>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
+                            FAQ
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!--Banner-->
+            <div class="ml-4 mt-4">
+                <span class="font-bold text-3xl">List of mentees Enrolled With</span>
+            </div>
+
+            <!--Div for list mentees for which the mentee is enrolled with-->
+            <div id="my_mentee_list" class="flex flex-wrap justify-center">
+
+            </div> <!--End List-->
+
+        </div> <!--My mentees-->
         <!-----------------------Admin Portal----------------------->
         <!--Admin LogOn Panel-->
         <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
