@@ -5,10 +5,11 @@
     <title>M&Ms</title>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
     <script type="text/javascript">
         //using the stack card card approach to show items on the app
-        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "myMenteesPanel", "menteeRegistrationPanel", "mentorRegistrationPanel", "adminRegistrationPanel", "adminMenteePanel", "adminMentorPanel", "menteeProfilePanel", "mentorProfilePanel"];
+        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "myMenteesPanel", "menteeRegistrationPanel", "mentorRegistrationPanel", "adminRegistrationPanel", "adminMenteePanel", "adminMentorPanel", "menteeProfilePanel", "mentorProfilePanel", "mentorDashboard"];
 
         //pannel toggle function
         function showPanel(panelId) {
@@ -33,6 +34,8 @@
                     } else if (panelId == "mentorProfilePanel") {
                         console.log("about to run mentor profile")
                         LoadMentorProfile();
+                    } else if (panelId == "mentorDashboard") {
+                        LoadSelectMentees();
                     }
 
 
@@ -109,7 +112,7 @@
                 dataType: "json",
                 success: function (msg) {
                     if (msg.d) {
-                        showPanel("myMenteesPanel");
+                        showPanel("mentorDashboard");
                     }
                     else {
                         alert("Login Failed. Try Again.")
@@ -204,7 +207,7 @@
             });
         }
 
-        //Populate Mentor Catalog Search 
+        //Populate Mentor Catalog Search
         function LoadMentors() {
             var webMethod = "ProjectServices.asmx/GetMentors";
             $.ajax({
@@ -736,17 +739,43 @@
             });
         }
 
+        function LoadSelectMentees() {
+            var webMethod = "ProjectServices.asmx/GetMyMentees";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        menteesArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentee_select").empty()
+                        for (var i = 0; i < menteesArray.length; i++) {
+
+                            $("#mentee_select").append(
+                                "<option id='" + menteesArray[i].id + "'>" + menteesArray[i].fname + " " + menteesArray[i].lname + "</option>"
+                            );
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
 
     </script>
 </head>
 
 <body onload="showPanel('logonMenteePanel');">
-    
+
     <div id="contentContainer">
 
         <!-----------------------Mentee Portal----------------------->
         <!--Mentee LogOn Panel-->
-        <div id="logonMenteePanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div id="logonMenteePanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
 
             <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
                 <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
@@ -809,7 +838,7 @@
 
         </div> <!--End Mentee-->
         <!--Mentee Registration-->
-        <div id="menteeRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div id="menteeRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
 
             <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8 justify-center">
                 <span class="font-bold text-6xl tracking-tight text-white my-10">
@@ -866,7 +895,7 @@
                                 Title
                             </label>
                             <div class="relative">
-                                <select id="interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                <select id="interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     <option value="Teller">Teller</option>
                                     <option value="Analyst">Analyst</option>
                                     <option value="Auditor">Auditor</option>
@@ -884,7 +913,7 @@
                                 Availability
                             </label>
                             <div class="relative">
-                                <select id="availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                <select id="availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     <option value="Morning">Morning</option>
                                     <option value="Afternoon">Afternoon</option>
                                     <option value="Evening">Evening</option>
@@ -1033,7 +1062,7 @@
 
         </div> <!--Mentor Search-->
         <!--My Mentors-->
-        <div id="myMentorsPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+        <div id="myMentorsPanel" class="bg-orange-300" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
             <!-- Banner -->
             <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
 
@@ -1117,7 +1146,7 @@
         </div>
         <!-----------------------Mentor Portal----------------------->
         <!--Mentor LogOn Panel-->
-        <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
 
             <!-- Banner -->
             <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
@@ -1181,7 +1210,7 @@
 
         </div> <!--End Mentor LogOn-->
         <!--Mentor Registration-->
-        <div id="mentorRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div id="mentorRegistrationPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
 
             <div class="shadow rounded flex w-9/10 bg-green-500 my-4 mx-8 justify-center">
                 <span class="font-bold text-6xl tracking-tight text-white my-10">
@@ -1256,7 +1285,7 @@
                                 Availability
                             </label>
                             <div class="relative">
-                                <select id="mentor_availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                <select id="mentor_availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                                     <option value="Morning">Morning</option>
                                     <option value="Afternoon">Afternoon</option>
                                     <option value="Evening">Evening</option>
@@ -1290,7 +1319,7 @@
 
         </div> <!--End Mentor Registrations-->
         <!--My Mentees-->
-        <div id="myMenteesPanel" class="bg-green-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+        <div id="myMenteesPanel" class="bg-green-300" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
             <!-- Banner -->
             <nav class="flex items-center justify-between flex-wrap bg-green-500 p-6">
 
@@ -1303,7 +1332,7 @@
 
                 <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
                     <div class="text-1xl lg:flex-grow">
-                        <button onclick="showPanel('#')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                        <button onclick="showPanel('mentorDashboard')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
                             Mentee Search
                         </button>
                         <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-green-700 mr-4 bg-green-200 rounded p-1 shadow border-transparent">
@@ -1326,7 +1355,7 @@
                 <span class="font-bold text-3xl">List of mentees Enrolled With</span>
             </div>
 
-            <!--Div for list mentees for which the mentee is enrolled with-->
+            <!--Div for list mentees for which the mentor is enrolled with-->
             <div id="my_mentee_list" class="flex flex-wrap justify-center">
 
             </div> <!--End List-->
@@ -1341,15 +1370,52 @@
                     <div class="w-full my-0">
                         <span class="font-bold text-6xl tracking-tight">M&M's</span>
                     </div>
-
                 </div>
 
                 <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
                     <div class="text-1xl lg:flex-grow">
-                        <button onclick="showPanel('#')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                        <button onclick="showPanel('mentorDashboard')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
                             Mentee Search
                         </button>
-                        <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-green-700 mr-4 bg-green-200 rounded p-1 shadow border-transparent">
+                        <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
+                            My Mentees
+                        </button>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
+                            FAQ
+                        </a>
+                    </div>
+                    <div>
+                        <button onclick="showPanel('mentorProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+            <!--Body-->
+
+            <div id="mentor_profile" class="container mx-auto px-4">
+
+
+            </div>
+
+        </div>
+
+        <div id="mentorDashboard" class="bg-green-300" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+
+            <nav class="flex items-center justify-between flex-wrap bg-green-500 p-6">
+
+                <div class="flex flex-wrap items-center flex-shrink-0 text-white mr-6">
+                    <div class="w-full my-0">
+                        <span class="font-bold text-6xl tracking-tight">M&M's</span>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('mentorDashboard')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-green-700 mr-4 bg-green-200 rounded p-1 shadow border-transparent">
+                            Mentee Search
+                        </button>
+                        <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
                             My Mentees
                         </button>
                         <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
@@ -1364,222 +1430,270 @@
 
             </nav>
 
-            <!--Body-->
-
-            <div id="mentor_profile" class="container mx-auto px-4">
-
-
+            <div class="flex mt-16 justify-center mb-8">
+                <p class="w-full text-center text-6xl font-bold">
+                    Mentees Health Dashboard
+                </p>
             </div>
 
-        </div>
-        <!-----------------------Admin Portal----------------------->
-        <!--Admin LogOn Panel-->
-        <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-            <!-- Banner -->
-            <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
-                <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
-                    Mentees & Mentors (M&Ms)
-                </span>
-            </div>
+            <div class="flex flex-wrap mx-64">
 
-            <!-- Log In Form -->
-            <div class="flex w-full max-w-xs mx-auto">
+                <!--row 1-->
+                <div class="w-1/6 py-4 pl-10">
+                    <span class="text-4xl items-center font-bold">Select Mentee: </span>
+                </div>
+                <div class="w-5/6 px-4">
+                    <select id="mentee_select" class="w-full h-full appearance-none bg-gray-100 border border-gray-200 text-green-700 focus:bg-white py-3 px-8 rounded-lg shadow-md leading-tight text-3xl font-semibold">
+                    </select>
+                </div>
 
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnAdmin($('#admin_username').val(), $('#admin_password').val()); return false;">
 
-                    <div class="mb-2">
-                        <span class="text-blue-500 font-bold">Login As:</span>
+                <!--row 2-->
+                <div class="w-1/2 px-4 mt-8">
+                    <div class="p-6 bg-purple-500 shadow-xl rounded-md">
+                        <p class="underline text-4xl text-white text-center font-bold">Average Number of Check-Ins Per Month</p>
+                        <p id="avg_checkins" class="text-6xl text-white text-center font-bold py-8">2.5</p>
                     </div>
-
-                    <div class="mb-2">
-                        <ul class="flex border-b">
-                            <li class="mr-1">
-                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMenteePanel')">Mentee</a>
-                            </li>
-                            <li class="mr-1">
-                                <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMentorPanel')">Mentor</a>
-                            </li>
-                            <li class="-mb-px mr-1">
-                                <a class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold cursor-pointer" onclick="showPanel('logonAdminPanel')">Admin</a>
-                            </li>
-                        </ul>
+                </div>
+                <div class="w-1/2 px-4 mt-8">
+                    <div class="p-6 bg-yellow-500 shadow-xl rounded-md">
+                        <p class="underline text-4xl text-white text-center font-bold">Mentee Health</p>
+                        <p id="health" class="text-6xl text-white text-center font-bold py-8">Average</p>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-                            Username
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_username" type="text" placeholder="Username">
-                    </div>
+                <!--row 3-->
+                <div class="w-full mt-6">
+                    <canvas id="myChart" height="100"></canvas>
+                    <script>
+                        var ctx = document.getElementById('myChart').getContext('2d');
+                        Chart.defaults.global.defaultFontSize = 26;
+                        var chart = new Chart(ctx, {
+                            // The type of chart we want to create
+                            type: 'line',
 
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                            Password
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_password" type="password" placeholder="******************">
-                    </div>
+                            // The data for our dataset
+                            data: {
+                                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                                datasets: [{
+                                    label: 'My First dataset',
+                                    backgroundColor: 'rgb(255, 99, 132)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    data: [0, 10, 5, 2, 20, 30, 45]
+                                }]
+                            },
 
-                    <!-- Sign In & Creating an Account -->
-                    <div class="flex items-center justify-between mb-4">
-                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                            Sign In
-                        </button>
-                    </div>
-
-                </form>
+                            // Configuration options go here
+                            options: {
+                            }
+                        });
+                    </script>
+                </div>
 
             </div>
         </div>
-        <!-- Admin Registration -->
-        <div id="adminRegistrationPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
-            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
-
-                <div class="flex items-center flex-shrink-0 text-white mr-6">
-                    <span class="font-bold text-6xl tracking-tight">Admin</span>
-
-                </div>
-
-                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
-                    <div class="text-1xl lg:flex-grow">
-                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            Add Admins
-                        </button>
-                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentors
-                        </button>
-                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentees
-                        </button>
-                    </div>
-                    <div>
-                        <button onclick="LogOff()" class="text-white">Sign Out</button>
-                    </div>
-                </div>
-
-            </nav>
-            <div class="flex w-full max-w-xs mx-auto">
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="NewAdmin($('#new_admin_username').val(), $('#new_admin_password').val()); return false;">
-
-                    <div class="mb-2">
-                        <span class="text-blue-500 font-bold">Admin Sign Up:</span>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-                            Username
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_username" type="text" placeholder="Username">
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                            Password
-                        </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_password" type="password" placeholder="*******">
-                    </div>
-
-                    <!-- Sign In & Creating an Account -->
-                    <div class="flex items-center justify-between mb-4">
-                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                            Create Account
-                        </button>
-                    </div>
-
-                </form>
-            </div>
+    <!-----------------------Admin Portal----------------------->
+    <!--Admin LogOn Panel-->
+    <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <!-- Banner -->
+        <div class="shadow rounded flex w-9/10 bg-orange-500 my-4 mx-8">
+            <span class="font-bold text-5xl tracking-tight text-white my-10 ml-20">
+                Mentees & Mentors (M&Ms)
+            </span>
         </div>
-        <!-- Admin Mentee List -->
-        <div id="adminMenteePanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
 
-            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+        <!-- Log In Form -->
+        <div class="flex w-full max-w-xs mx-auto">
 
-                <div class="flex items-center flex-shrink-0 text-white mr-6">
-                    <span class="font-bold text-6xl tracking-tight">Admin</span>
+            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnAdmin($('#admin_username').val(), $('#admin_password').val()); return false;">
 
+                <div class="mb-2">
+                    <span class="text-blue-500 font-bold">Login As:</span>
                 </div>
 
-                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
-                    <div class="text-1xl lg:flex-grow">
-                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            Add Admins
-                        </button>
-                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentors
-                        </button>
-                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentees
-                        </button>
-                    </div>
-                    <div>
-                        <button onclick="LogOff()" class="text-white">Sign Out</button>
-                    </div>
+                <div class="mb-2">
+                    <ul class="flex border-b">
+                        <li class="mr-1">
+                            <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMenteePanel')">Mentee</a>
+                        </li>
+                        <li class="mr-1">
+                            <a class="bg-white inline-block py-2 px-4 text-blue-500 hover:text-blue-800 font-semibold cursor-pointer" onclick="showPanel('logonMentorPanel')">Mentor</a>
+                        </li>
+                        <li class="-mb-px mr-1">
+                            <a class="bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 text-blue-700 font-semibold cursor-pointer" onclick="showPanel('logonAdminPanel')">Admin</a>
+                        </li>
+                    </ul>
                 </div>
 
-            </nav>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                        Username
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_username" type="text" placeholder="Username">
+                </div>
 
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Password
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_password" type="password" placeholder="******************">
+                </div>
 
+                <!-- Sign In & Creating an Account -->
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                        Sign In
+                    </button>
+                </div>
 
-            <div class="ml-4 mt-4">
-                <span class="font-bold text-2xl">All Mentees</span>
-            </div>
-
-            <div id="all_mentees" class="flex flex-wrap bg-transparent justify-center m-4">
-
-            </div>
+            </form>
 
         </div>
-        <!-- Admin Mentor List -->
-        <div id="adminMentorPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+    </div>
+    <!-- Admin Registration -->
+    <div id="adminRegistrationPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
 
-            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+        <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
 
-                <div class="flex items-center flex-shrink-0 text-white mr-6">
-                    <span class="font-bold text-6xl tracking-tight">Admin</span>
-
-                </div>
-
-                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
-                    <div class="text-1xl lg:flex-grow">
-                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            Add Admins
-                        </button>
-                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentors
-                        </button>
-                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
-                            View Mentees
-                        </button>
-                    </div>
-                    <div>
-                        <button onclick="LogOff()" class="text-white">Sign Out</button>
-                    </div>
-                </div>
-
-            </nav>
-
-
-
-            <div class="ml-4 mt-4">
-                <span class="font-bold text-2xl">All Mentors</span>
-            </div>
-
-            <div id="all_mentors" class="flex flex-wrap bg-transparent justify-center m-4">
+            <div class="flex items-center flex-shrink-0 text-white mr-6">
+                <span class="font-bold text-6xl tracking-tight">Admin</span>
 
             </div>
+
+            <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                <div class="text-1xl lg:flex-grow">
+                    <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        Add Admins
+                    </button>
+                    <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentors
+                    </button>
+                    <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentees
+                    </button>
+                </div>
+                <div>
+                    <button onclick="LogOff()" class="text-white">Sign Out</button>
+                </div>
+            </div>
+
+        </nav>
+        <div class="flex w-full max-w-xs mx-auto">
+            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="NewAdmin($('#new_admin_username').val(), $('#new_admin_password').val()); return false;">
+
+                <div class="mb-2">
+                    <span class="text-blue-500 font-bold">Admin Sign Up:</span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                        Username
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_username" type="text" placeholder="Username">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Password
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_password" type="password" placeholder="*******">
+                </div>
+
+                <!-- Sign In & Creating an Account -->
+                <div class="flex items-center justify-between mb-4">
+                    <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                        Create Account
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- Admin Mentee List -->
+    <div id="adminMenteePanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+
+        <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+
+            <div class="flex items-center flex-shrink-0 text-white mr-6">
+                <span class="font-bold text-6xl tracking-tight">Admin</span>
+
+            </div>
+
+            <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                <div class="text-1xl lg:flex-grow">
+                    <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        Add Admins
+                    </button>
+                    <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentors
+                    </button>
+                    <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentees
+                    </button>
+                </div>
+                <div>
+                    <button onclick="LogOff()" class="text-white">Sign Out</button>
+                </div>
+            </div>
+
+        </nav>
+
+
+
+        <div class="ml-4 mt-4">
+            <span class="font-bold text-2xl">All Mentees</span>
+        </div>
+
+        <div id="all_mentees" class="flex flex-wrap bg-transparent justify-center m-4">
+
+        </div>
+
+    </div>
+    <!-- Admin Mentor List -->
+    <div id="adminMentorPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+
+        <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+
+            <div class="flex items-center flex-shrink-0 text-white mr-6">
+                <span class="font-bold text-6xl tracking-tight">Admin</span>
+
+            </div>
+
+            <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                <div class="text-1xl lg:flex-grow">
+                    <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        Add Admins
+                    </button>
+                    <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentors
+                    </button>
+                    <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                        View Mentees
+                    </button>
+                </div>
+                <div>
+                    <button onclick="LogOff()" class="text-white">Sign Out</button>
+                </div>
+            </div>
+
+        </nav>
+
+
+
+        <div class="ml-4 mt-4">
+            <span class="font-bold text-2xl">All Mentors</span>
+        </div>
+
+        <div id="all_mentors" class="flex flex-wrap bg-transparent justify-center m-4">
 
         </div>
 
     </div>
 
-        <!--End Amdin-->
-
-
-
-
-
-
     </div>
+
+    <!--End Amdin-->
 
 </body>
 </html>
