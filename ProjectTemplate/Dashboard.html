@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <script>
+        function LoadMentors() {
+            var webMethod = "ProjectServices.asmx/GetMyMentees";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        menteesArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentee_select").empty()
+                        for (var i = 0; i < menteesArray.length; i++) {
+
+                            $("#mentee_select").append(
+                                "<option id='"+ menteesArray[i].id +"'>" + menteesArray[i].fname + " " +  menteesArray[i].lname + "</option>"
+                            );
+                        }
+                    }
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+    </script>
+
+</head>
+
+<body class="bg-green-200">
+    <nav class="flex items-center justify-between flex-wrap bg-green-500 p-6">
+
+        <div class="flex items-center flex-shrink-0 text-white mr-6">
+            <span class="font-bold text-6xl tracking-tight">M&M's</span>
+
+        </div>
+
+        <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+            <div class="text-1xl lg:flex-grow">
+                <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                    Dashboard
+                </a>
+                <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                    My Mentees
+                </a>
+                <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
+                    FAQ
+                </a>
+            </div>
+            <div>
+                <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                <a href="#" onclick="LogOff()" class="text-white">Sign Out</a>
+            </div>
+        </div>
+
+    </nav>
+
+    <div class="flex mt-16 justify-center mb-8">
+        <p class="w-full text-center text-6xl font-bold">
+            Mentees Health Dashboard
+        </p>
+    </div>
+
+    <div class="flex flex-wrap mx-64">
+
+        <!--row 1-->
+        <div class="w-1/6 py-4 pl-10">
+            <span class="text-4xl items-center font-bold">Select Mentee: </span>
+        </div>
+        <div class="w-5/6 px-4">
+            <select id="mentee_select" class="w-full h-full appearance-none bg-gray-100 border border-gray-200 text-green-700 focus:bg-white py-3 px-8 rounded-lg shadow-md leading-tight text-3xl font-semibold">
+
+            </select>
+        </div>
+        
+
+        <!--row 2-->
+        <div class="w-1/2 px-4 mt-8">
+            <div class="p-6 bg-purple-500 shadow-xl rounded-md">
+                <p class="underline text-4xl text-white text-center font-bold">Average Number of Check-Ins Per Month</p>
+                <p id="avg_checkins" class="text-6xl text-white text-center font-bold py-8">2.5</p>
+            </div>
+        </div>
+        <div class="w-1/2 px-4 mt-8">
+            <div class="p-6 bg-yellow-500 shadow-xl rounded-md">
+                <p class="underline text-4xl text-white text-center font-bold">Mentee Health</p>
+                <p id="health" class="text-6xl text-white text-center font-bold py-8">Average</p>
+            </div>
+        </div>
+
+        <!--row 3-->
+        <div class="w-full mt-6">
+            <canvas id="myChart" height="100"></canvas>
+            <script>
+                var ctx = document.getElementById('myChart').getContext('2d');
+                Chart.defaults.global.defaultFontSize = 26;
+                var chart = new Chart(ctx, {
+                    // The type of chart we want to create
+                    type: 'line',
+
+                    // The data for our dataset
+                    data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                        datasets: [{
+                            label: 'My First dataset',
+                            backgroundColor: 'rgb(255, 99, 132)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            data: [0, 10, 5, 2, 20, 30, 45]
+                        }]
+                    },
+
+                    // Configuration options go here
+                    options: {
+                    }
+                });
+            </script>
+        </div>
+
+    </div>
+
+</body>
+
+
+
+</html>
