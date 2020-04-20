@@ -160,7 +160,7 @@ namespace ProjectTemplate
 
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
 
-            string sqlSelect = "SELECT id FROM 2_Login_Admin WHERE email=@userName and password=@passValue";
+            string sqlSelect = "SELECT id FROM 2_Login_Admin WHERE username=@userName and password=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
@@ -252,11 +252,11 @@ namespace ProjectTemplate
         }
 
         [WebMethod(EnableSession = true)]
-        public void NewMentor(string email, string password, string fname, string lname, string zip, string interest_area, string availability, string mentee_count)
+        public void NewMentor(string email, string password, string fname, string lname, string zip, string interest_area, string availability)
         {
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
 
-            string sqlSelect = "INSERT INTO 2_Login_Mentor (email, password, fname, lname, zip, interest_area, availability, mentee_count) VALUES (@email, @password, @fname, @lname, @zip, @interest_area, @availability, @mentee_count)";
+            string sqlSelect = "INSERT INTO 2_Login_Mentor (email, password, fname, lname, zip, interest_area, availability) VALUES (@email, @password, @fname, @lname, @zip, @interest_area, @availability)";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
 
@@ -269,7 +269,30 @@ namespace ProjectTemplate
             sqlCommand.Parameters.AddWithValue("@zip", HttpUtility.UrlDecode(zip));
             sqlCommand.Parameters.AddWithValue("@interest_area", HttpUtility.UrlDecode(interest_area));
             sqlCommand.Parameters.AddWithValue("@availability", HttpUtility.UrlDecode(availability));
-            sqlCommand.Parameters.AddWithValue("@mentee_count", HttpUtility.UrlDecode(mentee_count));
+            
+
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            DataTable sqlDt = new DataTable();
+            sqlDa.Fill(sqlDt);
+
+
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void NewAdmin(string username, string password)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+            string sqlSelect = "INSERT INTO 2_Login_Admin (username, password) VALUES (@username, @password)";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@username", HttpUtility.UrlDecode(username));
+            sqlCommand.Parameters.AddWithValue("@password", HttpUtility.UrlDecode(password));
+
 
 
             MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
@@ -367,6 +390,94 @@ namespace ProjectTemplate
             return mentors.ToArray();
         }
 
+        [WebMethod(EnableSession = true)]
+        public Mentee[] GetAllMentees()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentees");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT * FROM 2_Login_Mentee;";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentee> mentees = new List<Mentee>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                mentees.Add(new Mentee
+                {
+                    id = Convert.ToInt32(sqlDt.Rows[i]["id"]),
+                    email = sqlDt.Rows[i]["email"].ToString(),
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString()
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return mentees.ToArray();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public Mentor[] GetAllMentors()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentors");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT * FROM 2_Login_Mentor;";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentor> mentors = new List<Mentor>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                mentors.Add(new Mentor
+                {
+                    id = Convert.ToInt32(sqlDt.Rows[i]["id"]),
+                    email = sqlDt.Rows[i]["email"].ToString(),
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString()
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return mentors.ToArray();
+        }
+
 
         [WebMethod(EnableSession = true)]
         public Mentee[] GetMyMentees()
@@ -413,6 +524,90 @@ namespace ProjectTemplate
         }
 
 
+        [WebMethod(EnableSession = true)]
+        public Mentee[] GetMenteeProfile()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentees");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "select fname, lname, zip, interest_area, availability, bio from 2_Login_Mentee where id=" + Session["id"];
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentee> user = new List<Mentee>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                user.Add(new Mentee
+                {
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString(),                    
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return user.ToArray();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public Mentor[] GetMentorProfile()
+        {
+            //check out the return type.  It's an array of Mentor objects.  You can look at our custom Mentor class in this solution to see that it's 
+            //just a container for public class-level variables.  It's a simple container that asp.net will have no trouble converting into json.  When we return
+            //sets of information, it's a good idea to create a custom container class to represent instances (or rows) of that information, and then return an array of those objects.  
+            //Keeps everything simple.
+
+            //LOGIC: get all the active accounts and return them!
+
+            DataTable sqlDt = new DataTable("mentor");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "select fname, lname, zip, interest_area, availability from 2_Login_Mentor where id=" + Session["id"] + ";";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            //filling the data table
+            sqlDa.Fill(sqlDt);
+
+            //loop through each row in the dataset, creating instances
+            //of our container class Account.  Fill each mentor with
+            //data from the rows, then dump them in a list.
+            List<Mentor> user = new List<Mentor>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                user.Add(new Mentor
+                {
+                    fname = sqlDt.Rows[i]["fname"].ToString(),
+                    lname = sqlDt.Rows[i]["lname"].ToString(),
+                    zip = sqlDt.Rows[i]["zip"].ToString(),
+                    interest_area = sqlDt.Rows[i]["interest_area"].ToString(),
+                    availability = sqlDt.Rows[i]["availability"].ToString(),
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return user.ToArray();
+        }
+
 
         [WebMethod(EnableSession = true)]
         public void AddPair(string mentor_id)
@@ -433,6 +628,102 @@ namespace ProjectTemplate
             sqlDa.Fill(sqlDt);
 
 
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void RemoveMentor(string mentor_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "DELETE FROM 2_Login_Mentor WHERE id=@mentor_id";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentor_id", HttpUtility.UrlDecode(mentor_id));
+
+
+            sqlConnection.Open();
+            try
+            {
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+            }
+            sqlConnection.Close();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void RemoveMentee(string mentee_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "DELETE FROM 2_Login_Mentee WHERE id=@mentee_id";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
+
+
+            sqlConnection.Open();
+            try
+            {
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+            }
+            sqlConnection.Close();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void RemoveMyMentee(string mentee_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "DELETE FROM 2_Mentor_Mentee WHERE mentee_id=@mentee_id and mentor_id = " + Session["id"] + ";";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
+
+
+            sqlConnection.Open();
+            try
+            {
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+            }
+            sqlConnection.Close();
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void RemoveMyMentor(string mentor_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "DELETE FROM 2_Mentor_Mentee WHERE mentor_id=@mentor_id and mentee_id = " + Session["id"] + ";";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentor_id", HttpUtility.UrlDecode(mentor_id));
+
+
+            sqlConnection.Open();
+            try
+            {
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+            }
+            sqlConnection.Close();
         }
 
 

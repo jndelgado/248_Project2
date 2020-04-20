@@ -8,7 +8,7 @@
 
     <script type="text/javascript">
         //using the stack card card approach to show items on the app
-        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "myMenteesPanel", "menteeRegistrationPanel", "mentorRegistrationPanel"];
+        var contentPanels = ["logonMenteePanel", "logonMentorPanel", "logonAdminPanel", "mentorSearchPanel", "myMentorsPanel", "myMenteesPanel", "menteeRegistrationPanel", "mentorRegistrationPanel", "adminRegistrationPanel", "adminMenteePanel", "adminMentorPanel", "menteeProfilePanel", "mentorProfilePanel"];
 
         //pannel toggle function
         function showPanel(panelId) {
@@ -22,7 +22,21 @@
                         LoadMyMentors();
                     } else if (panelId == "myMenteesPanel") {
                         LoadMyMentees();
+                    } else if (panelId == "adminRegistrationPanel") {
+                        console.log("Registering Shown")
+                    } else if (panelId == "adminMenteePanel") {
+                        AdminLoadMentees();  
+                    } else if (panelId == "adminMentorPanel") {
+                        AdminLoadMentors();
+                    } else if (panelId == "menteeProfilePanel") {
+                        LoadMenteeProfile();
+                    } else if (panelId == "mentorProfilePanel") {
+                        console.log("about to run mentor profile")
+                        LoadMentorProfile();
                     }
+
+
+                    
                 }
                 else {
                     $("#" + contentPanels[i]).css("visibility", "hidden");
@@ -59,7 +73,7 @@
 
         //Mentee Registration
         function NewMentee(email, password, fname, lname, zip, interest_area, availability) {
-            var webMethod = "../ProjectServices.asmx/NewMentee";
+            var webMethod = "ProjectServices.asmx/NewMentee";
             var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\"}";
 
             //alert("RUNNING");
@@ -108,9 +122,9 @@
         }
 
         //Mentor Registration
-        function NewMentor(email, password, fname, lname, zip, interest_area, availability, mentee_count) {
-            var webMethod = "../ProjectServices.asmx/NewMentor";
-            var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\",\"mentee_count\":\"" + encodeURI(mentee_count) + "\"}";
+        function NewMentor(email, password, fname, lname, zip, interest_area, availability) {
+            var webMethod = "ProjectServices.asmx/NewMentor";
+            var parameters = "{\"email\":\"" + encodeURI(email) + "\",\"password\":\"" + encodeURI(password) + "\",\"fname\":\"" + encodeURI(fname) + "\",\"lname\":\"" + encodeURI(lname) + "\",\"zip\":\"" + encodeURI(zip) + "\",\"interest_area\":\"" + encodeURI(interest_area) + "\",\"availability\":\"" + encodeURI(availability) + "\"}";
 
             //alert("RUNNING");
             //jQuery ajax method
@@ -145,7 +159,7 @@
                 dataType: "json",
                 success: function (msg) {
                     if (msg.d) {
-                        window.location.href = "../2_Homepages/HP_Admin.html";
+                        showPanel("adminMenteePanel");
                     }
                     else {
                         alert("Login Failed. Try Again.")
@@ -288,7 +302,7 @@
                                         "<div class='text-orange-500'>" + myMentorsArray[i].interest_area + "</div>" +
                                         "<div class='text-gray-600'>ZIP: " + myMentorsArray[i].zip + "</div>" +
                                         "<div class='text-gray-600'>Available: " + myMentorsArray[i].availability + "</div>" +
-                                        "<button id=" + myMentorsArray[i].id + " class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
+                                        "<button id=" + myMentorsArray[i].id + " onclick=\"RemoveMyMentor(this.id)\" class='w-4/5 rounded bg-orange-500 hover:bg-orange-400 text-white p-2 mt-2'>" +
                                             "Remove Mentor" +
                                         "</button>" +
                                     "</div>" +
@@ -347,7 +361,7 @@
                                 "<div class='text-green-500'>" + myMenteesArray[i].interest_area + "</div>" +
                                 "<div class='text-gray-600'>ZIP: " + myMenteesArray[i].zip + "</div>" +
                                 "<div class='text-gray-600'>Available: " + myMenteesArray[i].availability + "</div>" +
-                                "<button id=" + myMenteesArray[i].id + " class='w-4/5 rounded bg-green-500 hover:bg-green-400 text-white p-2 mt-2'>" +
+                                "<button id=" + myMenteesArray[i].id + " onclick=\"RemoveMyMentee(this.id)\" class='w-4/5 rounded bg-green-500 hover:bg-green-400 text-white p-2 mt-2'>" +
                                 "Remove Mentee" +
                                 "</button>" +
                                 "</div>" +
@@ -367,8 +381,336 @@
             });
         }
 
+        //Delete my mentor
+        function RemoveMyMentor(mentor_id) {
+            var webMethod = "ProjectServices.asmx/RemoveMyMentor";
+            var parameters = "{\"mentor_id\":\"" + encodeURI(mentor_id) + "\"}";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentor has been removed!");
+                    LoadMyMentors();
+                },
+                error: function (e) {
+                    alert("oops!");
+                }
+            });
+        }
+
+        //Delete my mentee
+        function RemoveMyMentee(mentee_id) {
+            var webMethod = "ProjectServices.asmx/RemoveMyMentee";
+            var parameters = "{\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentee has been removed!");
+                    LoadMyMentees();
+                },
+                error: function (e) {
+                    alert("oops!");
+                }
+            });
+        }
+
+        // Create new admin
+        function NewAdmin(username, password) {
+            var webMethod = "ProjectServices.asmx/NewAdmin";
+            var parameters = "{\"username\":\"" + encodeURI(username) + "\",\"password\":\"" + encodeURI(password) + "\"}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Account successfully created.")
+                    $("#new_admin_username").val("")
+                    $("#new_admin_password").val("")
+
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+
+        }
+
+        // admin page - load all mentees
+        function AdminLoadMentees() {
+            var webMethod = "ProjectServices.asmx/GetAllMentees";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+
+                    if (msg.d.length > 0) {
+
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        menteesArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#all_mentees").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < menteesArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+
+                            $("#all_mentees").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-1/5 p-4'>" +
+                                "<div class='w-full bg-white shadow-lg rounded-lg py-3'>" +
+                                "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
+                                "<div class='w-full text-center ml-1'>" +
+                                "<h2 class='text-lg'>" + menteesArray[i].fname + " " + menteesArray[i].lname + "</h2>" +
+                                "<div class='text-blue-500'>Expert Area: " + menteesArray[i].interest_area + "</div>" +
+                                "<div class='text-gray-600'>ZIP: " + menteesArray[i].zip + "</div>" +
+                                "<div class='text-gray-600'>Available: " + menteesArray[i].availability + "</div>" +
+                                "<button onclick=\"RemoveMentee(this.id)\" id=" + menteesArray[i].id + " class='w-4/5 rounded bg-blue-500 hover:bg-blue-400 text-white p-2 mt-2'>" +
+                                "Remove Mentee" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>" +
+                                "</div>"
+                            );
+                        }                   //we're putting together a div that holds info on the
+
+                    }
+
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+        // admin remove mentee
+        function RemoveMentee(mentee_id){
+            var webMethod = "ProjectServices.asmx/RemoveMentee";
+            var parameters = "{\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentee has been removed!");
+                    //window.location.reload();
+                },
+                error: function (e) {
+                    alert("oops!");
+                }
+            });
+        }
+
+        // admin page - load all mentors
+        function AdminLoadMentors() {
+
+            console.log("Running load mentors")
+
+            var webMethod = "ProjectServices.asmx/GetAllMentors";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+
+                    if (msg.d.length > 0) {
+
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        mentorsArray = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#all_mentors").empty()
+                        //again, we assume we're not an admin unless we see data from the server
+                        //that we know only admins can see
+                        ////////////////admin = false;/////////////////////////////
+                        for (var i = 0; i < mentorsArray.length; i++) {
+                            //we grab on to a specific html element in jQuery
+                            //by using a  # followed by that element's id.
+                            //var acct;
+                            ////if they have access to admin-level info (like userid and password) then
+                            ////create output that has an edit option
+
+                            $("#all_mentors").append(
+                                //anything we throw at our panel in the form of text
+                                //will be added to the contents of that panel.  Here
+                                //account as well as an edit link if the user is an admin
+                                "<div class='w-1/5 p-4'>" +
+                                "<div class='w-full bg-white shadow-lg rounded-lg py-3'>" +
+                                "<img src='PStock.png' class='h-24 w-24 mx-auto' alt='Profile Pic' />" +
+                                "<div class='w-full text-center ml-1'>" +
+                                "<h2 class='text-lg'>" + mentorsArray[i].fname + " " + mentorsArray[i].lname + "</h2>" +
+                                "<div class='text-blue-500'>Expert Area: " + mentorsArray[i].interest_area + "</div>" +
+                                "<div class='text-gray-600'>ZIP: " + mentorsArray[i].zip + "</div>" +
+                                "<div class='text-gray-600'>Available: " + mentorsArray[i].availability + "</div>" +
+                                "<button onclick=\"RemoveMentor(this.id)\" id=" + mentorsArray[i].id + " class='w-4/5 rounded bg-blue-500 hover:bg-blue-400 text-white p-2 mt-2'>" +
+                                "Remove Mentor" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>" +
+                                "</div>"
+                            );
+                        }                   //we're putting together a div that holds info on the
+
+                    }
+
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
+
+        // admin remove mentor
+        function RemoveMentor(mentor_id) {
+            var webMethod = "ProjectServices.asmx/RemoveMentor";
+            var parameters = "{\"mentor_id\":\"" + encodeURI(mentor_id) + "\"}";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Mentor has been removed!");
+                    //window.location.reload();
+                },
+                error: function (e) {
+                    alert("oops!");
+                }
+            });
+        }
+
+        // load mentee profile 
+        function LoadMenteeProfile() {
+            var webMethod = "ProjectServices.asmx/GetMenteeProfile";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+
+                    if (msg.d.length > 0) {
+
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        profileData = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentee_profile").empty()
+                        $("#mentee_profile").append(
+                            //anything we throw at our panel in the form of text
+                            //will be added to the contents of that panel.  Here
+                            //account as well as an edit link if the user is an admin
+                            "<section class= 'py-12 px-4'>" +
+                            "<div class='flex flex-wrap -mx-4 mb-8'>" +
+                            "<div class='lg:w-1/2 px-4 mb-4 lg:mb-0'>" + "<img class='rounded shadow-md' src='PStock.png' alt='' style='height:60%' >" + "</div>" +
+                            "<div class='lg:w-1/2 px-4'>" +
+                            "<h2 class='text-4xl font-heading font-semibold'>" + profileData[0].fname + " " + profileData[0].lname + "</h2>" +
+                            "<span class='text-xl'>Focus Area: " + profileData[0].interest_area + "</span>" +
+                            "<p class='text-xl>Zip Code: " + profileData[0].zip + "</p>" +
+                            "<p class='text-xl'> Avaliablity: " + profileData[0].availability + "</p>" +
+                            "<p class='my-5'>Bio: Let others know a little bit more about you. Post a bio!</p>" +
+                            "</div>" +
+                            "</div>" +
+                            "</section>");
+                    }
+
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
 
 
+        // load mentor profile 
+        function LoadMentorProfile() {
+            console.log("now in load mentor");
+            var webMethod = "ProjectServices.asmx/GetMentorProfile";
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+
+                    if (msg.d.length > 0) {
+
+                        //let's put our accounts that we get from the
+                        //server into our accountsArray variable
+                        //so we can use them in other functions as well
+                        profileData = msg.d;
+                        //this clears out the div that will hold our account info
+                        $("#mentor_profile").empty()
+                        $("#mentor_profile").append(
+                            //anything we throw at our panel in the form of text
+                            //will be added to the contents of that panel.  Here
+                            //account as well as an edit link if the user is an admin
+                            "<section class= 'py-12 px-4'>" +
+                            "<div class='flex flex-wrap -mx-4 mb-8'>" +
+                            "<div class='lg:w-1/2 px-4 mb-4 lg:mb-0'>" + "<img class='rounded shadow-md' src='PStock.png' alt='' style='height:60%' >" + "</div>" +
+                            "<div class='lg:w-1/2 px-4'>" +
+                            "<h2 class='text-4xl font-heading font-semibold'>" + profileData[0].fname + " " + profileData[0].lname + "</h2>" +
+                            "<span class='text-xl'>Focus Area: " + profileData[0].interest_area + "</span>" +
+                            "<p class='text-xl>Zip Code: " + profileData[0].zip + "</p>" +
+                            "<p class='text-xl'> Avaliablity: " + profileData[0].availability + "</p>" +
+                            "<p class='my-5'>Bio: Let others know a little bit more about you. Post a bio!</p>" +
+                            "</div>" +
+                            "</div>" +
+                            "</section>");
+                    }
+
+                    //we're showing the account window, so let's track that...
+                    //accountWindowShowing = true;
+                    ////...because the ShowMenu function behaves differently depending on
+                    ////if the account window is showing or not
+                    //ShowMenu();
+                },
+                error: function (e) {
+                    alert("boo...");
+                }
+            });
+        }
 
         //Add Pair
         function AddPair(mentor_id) {
@@ -386,6 +728,7 @@
                 dataType: "json",
                 success: function (msg) {
                     alert("Mentor has been added!");
+                    LoadMentors();
                 },
                 error: function (e) {
                     alert("NOT GOOD");
@@ -575,7 +918,7 @@
 
         </div> <!--End Mentee Registrations-->
         <!--Mentor Search/HomePage-->
-        <div id="mentorSearchPanel" class="bg-orange-300">
+        <div id="mentorSearchPanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
             <!-- Banner -->
             <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
 
@@ -599,7 +942,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                        <button onclick="showPanel('menteeProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
                         <button onclick="LogOff()" class="text-white">Sign Out</button>
                     </div>
                 </div>
@@ -709,12 +1052,12 @@
                         <button onclick="showPanel('myMentorsPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-orange-700 mr-4 bg-orange-200 rounded p-1 shadow border-transparent">
                             My Mentors
                         </button>
-                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700">
+                        <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700">
                             FAQ
                         </a>
                     </div>
                     <div>
-                        <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                        <button onclick="showPanel('menteeProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
                         <button onclick="LogOff()" class="text-white">Sign Out</button>
                     </div>
                 </div>
@@ -732,6 +1075,46 @@
             </div> <!--End List-->
 
         </div> <!--My Mentors-->
+        <!--Mentee Profile-->
+        <div id="menteeProfilePanel" class="bg-orange-300" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            <!-- Banner -->
+            <nav class="flex items-center justify-between flex-wrap bg-orange-500 p-6">
+
+                <div class="flex flex-wrap items-center flex-shrink-0 text-white mr-6">
+                    <div class="w-full my-0">
+                        <span class="font-bold text-6xl tracking-tight">M&M's</span>
+                    </div>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('mentorSearchPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-orange-700 mr-4 bg-orange-200 rounded p-1 shadow border-transparent">
+                            Mentor Search
+                        </button>
+                        <button onclick="showPanel('myMentorsPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700 mr-4">
+                            My Mentors
+                        </button>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-orange-700">
+                            FAQ
+                        </a>
+                    </div>
+                    <div>
+                        <button onclick="showPanel('menteeProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!--Body-->
+
+            <div id="mentee_profile" class="container mx-auto px-4">
+
+
+            </div>
+
+        </div>
         <!-----------------------Mentor Portal----------------------->
         <!--Mentor LogOn Panel-->
         <div id="logonMentorPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
@@ -808,23 +1191,23 @@
 
             <div class="flex w-full max-w-6xl mx-auto shadow-lg border-green-500 border-4 rounded bg-gray-100 p-5">
 
-                <form class="w-full text-3xl" onsubmit="NewMentor($('#email').val(), $('#password').val(), $('#fname').val(), $('#lname').val(), $('#zip').val(), $('#interest_area').val(), $('#availability').val()); return false;">
+                <form class="w-full text-3xl" onsubmit="NewMentor($('#mentor_email').val(), $('#mentor_password').val(), $('#mentor_fname').val(), $('#mentor_lname').val(), $('#mentor_zip').val(), $('#mentor_interest_area').val(), $('#mentor_availability').val()); return false;">
 
                     <div class="flex flex-wrap -mx-3 mb-6">
 
                         <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="fname">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="mentor_fname">
                                 First Name
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="fname" type="text" placeholder="Jane">
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="mentor_fname" type="text" placeholder="Jane">
                         </div>
 
 
                         <div class="w-full md:w-1/2 px-3">
-                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="lname">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="mentor_lname">
                                 Last Name
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="lname" type="text" placeholder="Doe">
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="mentor_lname" type="text" placeholder="Doe">
                         </div>
 
                     </div>
@@ -832,17 +1215,17 @@
                     <div class="flex flex-wrap -mx-3 mb-6">
 
                         <div class="w-full md:w-1/2 px-3">
-                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="email">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="mentor_email">
                                 Email
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="email" type="text" placeholder="mentee@myspace.gov">
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="mentor_email" type="text" placeholder="mentee@myspace.gov">
                         </div>
 
                         <div class="w-full md:w-1/2 px-3">
-                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="password">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="mentor_password">
                                 Password
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="password" type="password" placeholder="******************">
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="mentor_password" type="password" placeholder="******************">
                             <p class="text-gray-600 text-xs italic">Make it as long and as crazy as you'd like</p>
                         </div>
 
@@ -855,7 +1238,7 @@
                                 Title
                             </label>
                             <div class="relative">
-                                <select id="interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                <select id="mentor_interest_area" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
                                     <option value="Teller">Teller</option>
                                     <option value="Analyst">Analyst</option>
                                     <option value="Auditor">Auditor</option>
@@ -873,7 +1256,7 @@
                                 Availability
                             </label>
                             <div class="relative">
-                                <select id="availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
+                                <select id="mentor_availability" class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
                                     <option value="Morning">Morning</option>
                                     <option value="Afternoon">Afternoon</option>
                                     <option value="Evening">Evening</option>
@@ -885,10 +1268,10 @@
                         </div>
 
                         <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="grid-zip">
+                            <label class="block uppercase tracking-wide text-gray-700 font-bold mb-2" for="mentor_zip">
                                 Zip
                             </label>
-                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-zip" type="text" placeholder="85281">
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="mentor_zip" type="text" placeholder="85281">
                         </div>
 
                     </div>
@@ -897,7 +1280,7 @@
                         Create Account
                     </button>
 
-                    <button onclick="showPanel('logonMentorPanel')" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 my-2" type="button" >
+                    <button onclick="showPanel('logonMentorPanel')" class="w-full bg-green-500 text-white border-4 border-transparent rounded hover:bg-green-300 hover:border-green-500 hover:text-black hover:font-semibold p-2 my-2" type="button">
                         Already have an account? Log In Here
                     </button>
 
@@ -906,9 +1289,6 @@
             </div>
 
         </div> <!--End Mentor Registrations-->
-        
-        
-        
         <!--My Mentees-->
         <div id="myMenteesPanel" class="bg-green-300" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
             <!-- Banner -->
@@ -934,7 +1314,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="#" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</a>
+                        <button onclick="showPanel('mentorProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
                         <button onclick="LogOff()" class="text-white">Sign Out</button>
                     </div>
                 </div>
@@ -952,6 +1332,46 @@
             </div> <!--End List-->
 
         </div> <!--My mentees-->
+        <!--Mentor Profile-->
+        <div id="mentorProfilePanel" class="bg-green-300" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            <!-- Banner -->
+            <nav class="flex items-center justify-between flex-wrap bg-green-500 p-6">
+
+                <div class="flex flex-wrap items-center flex-shrink-0 text-white mr-6">
+                    <div class="w-full my-0">
+                        <span class="font-bold text-6xl tracking-tight">M&M's</span>
+                    </div>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('#')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700 mr-4">
+                            Mentee Search
+                        </button>
+                        <button onclick="showPanel('myMenteesPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-black hover:text-green-700 mr-4 bg-green-200 rounded p-1 shadow border-transparent">
+                            My Mentees
+                        </button>
+                        <a href="#responsive-header" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-green-700">
+                            FAQ
+                        </a>
+                    </div>
+                    <div>
+                        <button onclick="showPanel('mentorProfilePanel')" class="inline-block text-2xl px-4 py-3 leading-none border rounded text-white border-white hover:border-transparent hover:text-green-700 hover:bg-white mt-4 lg:mt-0">My Profile</button>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!--Body-->
+
+            <div id="mentor_profile" class="container mx-auto px-4">
+
+
+            </div>
+
+        </div>
         <!-----------------------Admin Portal----------------------->
         <!--Admin LogOn Panel-->
         <div id="logonAdminPanel" class="bg-cover" style="background-image: url('m&ms-bg.jpg'); position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
@@ -965,7 +1385,7 @@
             <!-- Log In Form -->
             <div class="flex w-full max-w-xs mx-auto">
 
-                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnAdmin($('#username').val(), $('#password').val()); return false;">
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="LogOnAdmin($('#admin_username').val(), $('#admin_password').val()); return false;">
 
                     <div class="mb-2">
                         <span class="text-blue-500 font-bold">Login As:</span>
@@ -989,14 +1409,14 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
                             Username
                         </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Username">
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_username" type="text" placeholder="Username">
                     </div>
 
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
                             Password
                         </label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="admin_password" type="password" placeholder="******************">
                     </div>
 
                     <!-- Sign In & Creating an Account -->
@@ -1009,7 +1429,150 @@
                 </form>
 
             </div>
-        </div> <!--End Amdin-->
+        </div>
+        <!-- Admin Registration -->
+        <div id="adminRegistrationPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+
+            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+
+                <div class="flex items-center flex-shrink-0 text-white mr-6">
+                    <span class="font-bold text-6xl tracking-tight">Admin</span>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            Add Admins
+                        </button>
+                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentors
+                        </button>
+                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentees
+                        </button>
+                    </div>
+                    <div>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+            <div class="flex w-full max-w-xs mx-auto">
+                <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onsubmit="NewAdmin($('#new_admin_username').val(), $('#new_admin_password').val()); return false;">
+
+                    <div class="mb-2">
+                        <span class="text-blue-500 font-bold">Admin Sign Up:</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_username" type="text" placeholder="Username">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new_admin_password" type="password" placeholder="*******">
+                    </div>
+
+                    <!-- Sign In & Creating an Account -->
+                    <div class="flex items-center justify-between mb-4">
+                        <button class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                            Create Account
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        <!-- Admin Mentee List -->
+        <div id="adminMenteePanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+
+            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+
+                <div class="flex items-center flex-shrink-0 text-white mr-6">
+                    <span class="font-bold text-6xl tracking-tight">Admin</span>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            Add Admins
+                        </button>
+                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentors
+                        </button>
+                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentees
+                        </button>
+                    </div>
+                    <div>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+
+
+
+            <div class="ml-4 mt-4">
+                <span class="font-bold text-2xl">All Mentees</span>
+            </div>
+
+            <div id="all_mentees" class="flex flex-wrap bg-transparent justify-center m-4">
+
+            </div>
+
+        </div>
+        <!-- Admin Mentor List -->
+        <div id="adminMentorPanel" class="bg-blue-200" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">
+
+            <nav class="flex items-center justify-between flex-wrap bg-blue-400 p-6">
+
+                <div class="flex items-center flex-shrink-0 text-white mr-6">
+                    <span class="font-bold text-6xl tracking-tight">Admin</span>
+
+                </div>
+
+                <div class="w-full flex flex-grow lg:flex lg:items-center lg:w-auto">
+                    <div class="text-1xl lg:flex-grow">
+                        <button onclick="showPanel('adminRegistrationPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            Add Admins
+                        </button>
+                        <button onclick="showPanel('adminMentorPanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentors
+                        </button>
+                        <button onclick="showPanel('adminMenteePanel')" class="block mt-4 lg:inline-block lg:mt-0 text-gray-200 hover:text-blue-700 mr-4">
+                            View Mentees
+                        </button>
+                    </div>
+                    <div>
+                        <button onclick="LogOff()" class="text-white">Sign Out</button>
+                    </div>
+                </div>
+
+            </nav>
+
+
+
+            <div class="ml-4 mt-4">
+                <span class="font-bold text-2xl">All Mentors</span>
+            </div>
+
+            <div id="all_mentors" class="flex flex-wrap bg-transparent justify-center m-4">
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <!--End Amdin-->
 
 
 
