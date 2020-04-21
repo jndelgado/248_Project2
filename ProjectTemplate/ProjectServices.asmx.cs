@@ -523,6 +523,36 @@ namespace ProjectTemplate
             return mentees.ToArray();
         }
 
+        [WebMethod(EnableSession = true)]
+        public Checkins[] GetData(string mentee_id)
+        {
+            DataTable sqlDt = new DataTable("dashboard_data");
+
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT MONTHNAME(checkin_date) AS 'Month' , COUNT(MONTH(checkin_date)) AS 'Checkins' FROM 2_Mentor_Mentee WHERE mentee_id=@mentee_id and mentor_id = " + Session["id"] + " GROUP BY MONTHNAME(checkin_date) ORDER BY checkin_date;";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
+
+            //gonna use this to fill a data table
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            sqlDa.Fill(sqlDt);
+
+            List<Checkins> checkins = new List<Checkins>();
+            for (int i = 0; i < sqlDt.Rows.Count; i++)
+            {
+                checkins.Add(new Checkins
+                {
+                    month = sqlDt.Rows[i]["month"].ToString(),
+                    checkins = Convert.ToInt32(sqlDt.Rows[i]["checkins"]),
+                });
+            }
+            //convert the list of accounts to an array and return!
+            return checkins.ToArray();
+        }
+
 
         [WebMethod(EnableSession = true)]
         public Mentee[] GetMenteeProfile()
@@ -631,6 +661,27 @@ namespace ProjectTemplate
         }
 
         [WebMethod(EnableSession = true)]
+        public void MentorCheckin(string mentee_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+
+            string sqlSelect = "INSERT INTO 2_Mentor_Mentee (mentor_id, mentee_id) VALUES (" + Session["id"] + ", @mentee_id)";
+
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
+
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            DataTable sqlDt = new DataTable();
+            sqlDa.Fill(sqlDt);
+
+
+        }
+
+        [WebMethod(EnableSession = true)]
         public void RemoveMentor(string mentor_id)
         {
             string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
@@ -726,7 +777,25 @@ namespace ProjectTemplate
             sqlConnection.Close();
         }
 
+        [WebMethod(EnableSession = true)]
+        public string GetAverage(string mentee_id)
+        {
+            string sqlConnectString = System.Configuration.ConfigurationManager.ConnectionStrings["myDB"].ConnectionString;
+            string sqlSelect = "SELECT ROUND(COUNT(MONTH(checkin_date)) / COUNT(DISTINCT(MONTH(checkin_date))), 2) AS 'average' FROM 2_Mentor_Mentee WHERE mentee_id=@mentee_id and mentor_id = " + Session["id"] + ";";
 
+            MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
+            MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
+
+            sqlCommand.Parameters.AddWithValue("@mentee_id", HttpUtility.UrlDecode(mentee_id));
+
+            MySqlDataAdapter sqlDa = new MySqlDataAdapter(sqlCommand);
+            DataTable sqlDt = new DataTable();
+            sqlDa.Fill(sqlDt);
+
+            string average = sqlDt.Rows[0]["average"].ToString();
+
+            return average;
+        }
 
 
     }

@@ -36,6 +36,7 @@
                         LoadMentorProfile();
                     } else if (panelId == "mentorDashboard") {
                         LoadSelectMentees();
+                        LoadDashboardContainers(1);
                     }
 
 
@@ -357,7 +358,7 @@
                                 //will be added to the contents of that panel.  Here
                                 //we're putting together a div that holds info on the
                                 //account as well as an edit link if the user is an admin
-                                "<div class='w-2/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg bg-gray-200 m-4 p-2'>" +
+                                "<div class='w-2/5 border-solid border-2 border-gray-400 shadow-lg rounded-lg bg-gray-200 m-4 px-2 py-4'>" +
                                 "<img src='PStock.png' class='h-24 w-24 mx-auto mb-2' alt='Profile Pic' />" +
                                 "<div class='w-full text-center ml-1'>" +
                                 "<h2 class='text-lg'>" + myMenteesArray[i].fname + " " + myMenteesArray[i].lname + "</h2>" +
@@ -366,6 +367,9 @@
                                 "<div class='text-gray-600'>Available: " + myMenteesArray[i].availability + "</div>" +
                                 "<button id=" + myMenteesArray[i].id + " onclick=\"RemoveMyMentee(this.id)\" class='w-4/5 rounded bg-green-500 hover:bg-green-400 text-white p-2 mt-2'>" +
                                 "Remove Mentee" +
+                                "</button>" +
+                                "<button id=" + myMenteesArray[i].id + " onclick=\"MentorCheckin(this.id)\" class='w-4/5 rounded bg-green-500 hover:bg-green-400 text-white p-2 mt-2'>" +
+                                "Check In" +
                                 "</button>" +
                                 "</div>" +
                                 "</div>"
@@ -739,6 +743,30 @@
             });
         }
 
+        //Add Pair
+        function MentorCheckin(mentee_id) {
+
+            console.log("Checking Mentee In");
+
+            var webMethod = "ProjectServices.asmx/MentorCheckin";
+            var parameters = "{\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    alert("Check-In Registered.");
+                },
+                error: function (e) {
+                    alert("NOT GOOD");
+                }
+            });
+        }
+
+        //Selected Mentees
         function LoadSelectMentees() {
             var webMethod = "ProjectServices.asmx/GetMyMentees";
             $.ajax({
@@ -754,13 +782,64 @@
                         for (var i = 0; i < menteesArray.length; i++) {
 
                             $("#mentee_select").append(
-                                "<option id='" + menteesArray[i].id + "'>" + menteesArray[i].fname + " " + menteesArray[i].lname + "</option>"
+                                "<option value='" + menteesArray[i].id + "'>" + menteesArray[i].fname + " " + menteesArray[i].lname + "</option>"
                             );
                         }
                     }
                 },
                 error: function (e) {
                     alert("boo...");
+                }
+            });
+        }
+
+        //Load Dashboard Containers
+        function LoadDashboardContainers(mentee_id) {
+            updateChart(mentee_id);
+            var webMethod = "ProjectServices.asmx/GetAverage";
+            var parameters = "{\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.d.length > 0) {
+                        average = msg.d
+                        console.log(average);
+                        $('#avg_checkins').text(average);
+                        average_int = parseInt(average);
+                        if(average_int < 2) {
+                            $("#health_container").empty()
+                            $("#health_container").append(
+                                "<div class='p-6 bg-red-400 shadow-xl rounded-md'>" +
+                                "<p class='underline text-4xl text-white text-center font-bold'>Mentee Health</p>" +
+                                "<p class='text-6xl text-white text-center font-bold py-8'>Bad</p>" +
+                                "</div>"
+                            )
+                        } else if(average_int < 3.5) {
+                            $("#health_container").empty()
+                            $("#health_container").append(
+                                "<div class='p-6 bg-yellow-500 shadow-xl rounded-md'>" +
+                                "<p class='underline text-4xl text-white text-center font-bold'>Mentee Health</p>" +
+                                "<p class='text-6xl text-white text-center font-bold py-8'>Average</p>" +
+                                "</div>"
+                            )
+                        } else {
+                            $("#health_container").empty()
+                            $("#health_container").append(
+                                "<div class='p-6 bg-green-500 shadow-xl rounded-md'>" +
+                                "<p class='underline text-4xl text-white text-center font-bold'>Mentee Health</p>" +
+                                "<p class='text-6xl text-white text-center font-bold py-8'>Good</p>" +
+                                "</div>"
+                            )
+                        };
+                    }
+                },
+                error: function (e) {
+                    alert("NOT GOOD");
                 }
             });
         }
@@ -1443,7 +1522,7 @@
                     <span class="text-4xl items-center font-bold">Select Mentee: </span>
                 </div>
                 <div class="w-5/6 px-4">
-                    <select id="mentee_select" class="w-full h-full appearance-none bg-gray-100 border border-gray-200 text-green-700 focus:bg-white py-3 px-8 rounded-lg shadow-md leading-tight text-3xl font-semibold">
+                    <select id="mentee_select" onchange="LoadDashboardContainers(this.value)" class="w-full h-full appearance-none bg-gray-100 border border-gray-200 text-green-700 focus:bg-white py-3 px-8 rounded-lg shadow-md leading-tight text-3xl font-semibold">
                     </select>
                 </div>
 
@@ -1452,42 +1531,15 @@
                 <div class="w-1/2 px-4 mt-8">
                     <div class="p-6 bg-purple-500 shadow-xl rounded-md">
                         <p class="underline text-4xl text-white text-center font-bold">Average Number of Check-Ins Per Month</p>
-                        <p id="avg_checkins" class="text-6xl text-white text-center font-bold py-8">2.5</p>
+                        <p id="avg_checkins" class="text-6xl text-white text-center font-bold py-8"></p>
                     </div>
                 </div>
-                <div class="w-1/2 px-4 mt-8">
-                    <div class="p-6 bg-yellow-500 shadow-xl rounded-md">
-                        <p class="underline text-4xl text-white text-center font-bold">Mentee Health</p>
-                        <p id="health" class="text-6xl text-white text-center font-bold py-8">Average</p>
-                    </div>
-                </div>
+                <div id="health_container" class="w-1/2 px-4 mt-8"></div>
 
                 <!--row 3-->
                 <div class="w-full mt-6">
                     <canvas id="myChart" height="100"></canvas>
-                    <script>
-                        var ctx = document.getElementById('myChart').getContext('2d');
-                        Chart.defaults.global.defaultFontSize = 26;
-                        var chart = new Chart(ctx, {
-                            // The type of chart we want to create
-                            type: 'line',
-
-                            // The data for our dataset
-                            data: {
-                                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                                datasets: [{
-                                    label: 'My First dataset',
-                                    backgroundColor: 'rgb(255, 99, 132)',
-                                    borderColor: 'rgb(255, 99, 132)',
-                                    data: [0, 10, 5, 2, 20, 30, 45]
-                                }]
-                            },
-
-                            // Configuration options go here
-                            options: {
-                            }
-                        });
-                    </script>
+                    
                 </div>
 
             </div>
@@ -1697,3 +1749,68 @@
 
 </body>
 </html>
+
+<script>
+    var ctx = document.getElementById('myChart').getContext('2d');
+
+    Chart.defaults.global.defaultFontSize = 26;
+    var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: 'bar',
+
+        // The data for our dataset
+        data: {
+            datasets: [{
+                label: 'Number of Checkins',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+            }]
+        },
+
+        // Configuration options go here
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        max: 4,
+                        min: 0,
+                        stepSize: 1
+                    }
+                }]
+            }
+        }
+    });
+
+    function updateChart(mentee_id) {
+        var webMethod = "ProjectServices.asmx/GetData";
+        var parameters = "{\"mentee_id\":\"" + encodeURI(mentee_id) + "\"}";
+
+        $.ajax({
+            type: "POST",
+            url: webMethod,
+            data: parameters,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+                if (msg.d.length > 0) {
+                    data = msg.d;
+                    var months = [];
+                    var checkins = [];
+
+                    for (var i = 0; i < data.length; i++) {
+                        months.push(data[i].month)
+                        checkins.push(data[i].checkins)
+                    }
+
+                    chart.data.labels = months;
+                    chart.data.datasets[0].data = checkins;
+                    chart.update();
+
+                }
+            },
+            error: function (e) {
+                alert("boo...");
+            }
+        });
+    }
+</script>

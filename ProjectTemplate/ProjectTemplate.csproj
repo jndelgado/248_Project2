@@ -99,6 +99,7 @@
     <Content Include="2_Mentee\MentorSearch.html" />
     <Content Include="2_Mentee\PStock.png" />
     <Content Include="Dashboard.html" />
+    <Content Include="dashboard2.html" />
     <Content Include="Registration_Mentee.html" />
     <Content Include="2_Mentor\Registration_Mentor.html" />
     <Content Include="chart_test.html" />
@@ -125,6 +126,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Mentee.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="Mentor.cs" />
     <Compile Include="ProjectServices.asmx.cs">
       <DependentUpon>ProjectServices.asmx</DependentUpon>
